@@ -177,5 +177,9 @@ class IceCreamCone(Part):
     """
 
     """
+    drag_range = (0.05, 0.07)
+
     def __init__(self, reynolds_number: int, dynamic_pressure: float,
                  position: tuple, radius: float, ):
+        super().__init__(self.drag_range, reynolds_number, dynamic_pressure,
+                         position)
