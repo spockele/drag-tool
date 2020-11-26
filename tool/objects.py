@@ -45,6 +45,9 @@ class Sphere(Part):
 
         super().__init__(self.drag_range, reynolds_number, dynamic_pressure, position)
 
+    def __repr__(self):
+        return f"Sphere: [{self.position}, r={self.radius}]"
+
     def frontal_surface(self, axis_1: int, axis_2: int):
         """
         Determine the frontal surface on a given plane
@@ -80,6 +83,9 @@ class Cylinder(Part):
         self.orientation = orientation
 
         super().__init__(self.drag_range, reynolds_number, dynamic_pressure, position)
+
+    def __repr__(self):
+        return f"[Cylinder: {self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
 
     def frontal_surface(self, axis_1: int, axis_2: int):
         """
@@ -142,6 +148,9 @@ class Cuboid(Part):
 
         super().__init__(self.drag_range, reynolds_number, dynamic_pressure, position)
 
+    def __repr__(self):
+        return f"[Cuboid: {self.position}, dims={self.dimensions}]"
+
     def frontal_surface(self, axis_1: int, axis_2: int):
         top_left = (self.position[axis_1] - self.dimensions[axis_1] / 2,
                     self.position[axis_2] + self.dimensions[axis_2] / 2
@@ -164,48 +173,9 @@ class Cuboid(Part):
         return self.drag_coefficient * area * self.dynamic_pressure
 
 
-class Dorito(Part):
+class IceCreamCone(Part):
     """
-    Aerodynamic model specially for the dorito of concept 4
-        The reference area is the surface area of the dorito
-        The dorito is always parallel to the 02-plane
-    """
-    drag_range = (0.05, 0.05)
 
+    """
     def __init__(self, reynolds_number: int, dynamic_pressure: float,
-                 position: tuple, length: float, width: float, orientation: int):
-        if orientation == 1:
-            raise ValueError(f"Incompatible orientation of a dorito: {orientation}")
-        self.length = length
-        self.width = width
-        self.orientation = orientation
-        super().__init__(self.drag_range, reynolds_number, dynamic_pressure, position)
-
-    def frontal_surface(self, axis_1: int, axis_2: int):
-        if 1 not in (axis_1, axis_2):
-            raise ValueError(f"Can only calculate the frontal surface in the 01 and 12 planes")
-
-        elif self.orientation in (axis_1, axis_2):
-            datum = self.position[axis_1], self.position[axis_2]
-            return "flat_plate", datum, self.length, self.length * 0.005
-
-        else:
-            datum = self.position[axis_1], self.position[axis_2]
-            return "flat_plate", datum, self.width, self.width * 0.005
-
-    def smallest_coordinate(self, axis: int):
-        if axis == 1:
-            return self.position[axis]
-
-        elif axis == self.orientation:
-            return self.position[axis] - self.length
-
-        else:
-            return self.position[axis] - self.width / 2
-
-    def calculate_base_drag(self, direction: int):
-        if direction == 1:
-            raise ValueError(f"Incompatible flow direction: {direction}")
-
-        else:
-            return self.drag_coefficient * (0.5 * self.length * self.width) * self.dynamic_pressure
+                 position: tuple, radius: float, ):
