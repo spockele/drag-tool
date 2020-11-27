@@ -180,6 +180,59 @@ class IceCreamCone(Part):
     drag_range = (0.05, 0.07)
 
     def __init__(self, reynolds_number: int, dynamic_pressure: float,
-                 position: tuple, radius: float, ):
+                 position: tuple, radius: float, length_cylinder: float, length_cone: float,
+                 orientation: int):
+        self.radius = radius
+        self.length_cylinder = length_cylinder
+        self.length_cone = length_cone
+        self.orientation = orientation
+
         super().__init__(self.drag_range, reynolds_number, dynamic_pressure,
                          position)
+
+    def __repr__(self):
+        return f"[IceCream cone: r={self.radius}, l_co={self.length_cylinder}, " \
+               f"l_co={self.length_cone}, {self.orientation}]"
+
+    def frontal_surface(self, axis_1: int, axis_2: int):
+        if self.orientation == axis_1:
+            top_left = (self.position[axis_1],
+                        self.position[axis_2] + self.radius
+                        )
+            bottom_right = (self.position[axis_1] + self.length_cylinder,
+                            self.position[axis_2] - self.radius
+                            )
+            back_point = (self.position[axis_1] + self.length_cylinder + self.length_cone,
+                          self.position[axis_2])
+
+            return "cone", self.position, top_left, bottom_right, back_point
+
+        elif self.orientation == axis_2:
+            top_left = (self.position[axis_1] - self.radius,
+                        self.position[axis_2] + self.length_cylinder
+                        )
+            bottom_right = (self.position[axis_1] + self.radius,
+                            self.position[axis_2]
+                            )
+            back_point = (self.position[axis_1],
+                          self.position[axis_2] + self.length_cylinder + self.length_cone)
+
+            return "cone", self.position, top_left, bottom_right, back_point
+
+        else:
+            return "circle", self.position, self.radius
+
+    def smallest_coordinate(self, axis: int):
+        return self.position[axis] - self.radius
+
+    def calculate_base_drag(self, direction: int):
+        if self.orientation == direction:
+            volume = (2 * np.pi * self.radius ** 3) / 3 + \
+                     (np.pi * self.radius ** 2) * self.length_cylinder + \
+                     (np.pi * self.length_cone * self.radius ** 2) / 3
+
+            return self.drag_coefficient * (volume ** (2 / 3)) * self.dynamic_pressure
+
+        else:
+            raise ValueError(f"Drag calculation along {direction} axis not supported for "
+                             f"IceCreamCone")
