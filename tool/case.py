@@ -78,4 +78,10 @@ class Case:
             line = lines[count]
 
     def run_case(self):
-        pass
+        perpendicular_plane = [0, 1, 2]
+        perpendicular_plane.remove(self.flow_direction)
+
+        for part in self.parts:
+            part.set_frontal_surface(*perpendicular_plane)
+
+        self.parts.sort()

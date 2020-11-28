@@ -7,6 +7,31 @@ import numpy as np
 from .equations import drag_coefficient_function
 
 
+class Rectangle:
+    """
+
+    """
+
+    def __init__(self, left, right, top, bottom):
+        self.left, self.right, self.top, self.bottom = left, right, top, bottom
+
+        self.area = (self.right - self.left) * (self.top - self.bottom)
+
+    def __repr__(self):
+        return f"Rectangle: [lr=({self.left}, {self.right}), tb=({self.top}, {self.bottom})]"
+
+
+class Circle:
+    """
+
+    """
+
+    def __init__(self, x_centre, y_centre, radius):
+        self.x_centre, self.y_centre, self.radius = x_centre, y_centre, radius
+
+        self.area = np.pi * self.radius ** 2
+
+
 class Part:
     """
     The general aerodynamic model for all objects defined below
@@ -22,14 +47,36 @@ class Part:
         self.y_centre = position[1]
         self.z_centre = position[2]
 
-    def frontal_surface(self, axis_1: int, axis_2: int):
+        self._smallest_coordinate = None
+        self._frontal_surface = None
+
+    def set_frontal_surface(self, axis_1: int, axis_2: int):
         raise NotImplementedError("Cannot execute for base class Part")
 
-    def smallest_coordinate(self, axis: int):
+    def get_frontal_surface(self):
+        return self._frontal_surface
+
+    def set_smallest_coordinate(self, axis: int):
         raise NotImplementedError("Cannot execute for base class Part")
+
+    def get_smallest_coordinate(self):
+        return self._smallest_coordinate
 
     def calculate_base_drag(self, direction: int):
         raise NotImplementedError("Cannot execute for base class Part")
+
+    def __lt__(self, other):
+        if not isinstance(other, Part):
+            raise TypeError(f"Cannot compare Part to {type(other)}")
+
+        elif self._smallest_coordinate is None:
+            return AttributeError(f"Smallest coordinate of first Part not determined yet")
+
+        elif other.get_smallest_coordinate is None:
+            return AttributeError(f"Smallest coordinate of first Part not determined yet")
+
+        else:
+            return self._smallest_coordinate < other._smallest_coordinate
 
 
 class Sphere(Part):
@@ -48,21 +95,17 @@ class Sphere(Part):
     def __repr__(self):
         return f"Sphere: [{self.position}, r={self.radius}]"
 
-    def frontal_surface(self, axis_1: int, axis_2: int):
+    def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
         Determine the frontal surface on a given plane
         :param axis_1: First axis defining the plane
         :param axis_2: Second axis defining the plane
-        :return: (The shape of the surface,
-                The centre,
-                The radius,
-                The surface area)
+        :return: None
         """
-        centre = self.position[axis_1], self.position[axis_2]
-        return "circle", centre, self.radius, np.pi * self.radius ** 2
+        self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2], self.radius)
 
-    def smallest_coordinate(self, axis: int):
-        return self.position[axis] - self.radius
+    def set_smallest_coordinate(self, axis: int):
+        self._smallest_coordinate = self.position[axis] - self.radius
 
     def calculate_base_drag(self, direction: int):
         return self.drag_coefficient * (np.pi * self.radius ** 2) * self.dynamic_pressure
@@ -87,7 +130,7 @@ class Cylinder(Part):
     def __repr__(self):
         return f"[Cylinder: {self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
 
-    def frontal_surface(self, axis_1: int, axis_2: int):
+    def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
         Determine the frontal surface on a given plane
         :param axis_1: First axis defining the plane
@@ -98,35 +141,33 @@ class Cylinder(Part):
                 The surface area)
         """
         if self.orientation == axis_1:
-            top_left = (self.position[axis_1] - self.length / 2,
-                        self.position[axis_2] + self.radius
-                        )
-            bottom_right = (self.position[axis_1] + self.length / 2,
-                            self.position[axis_2] - self.radius
-                            )
+            left = self.position[axis_1] - self.length / 2,
+            top = self.position[axis_2] + self.radius
+            right = self.position[axis_1] + self.length / 2
+            bottom = self.position[axis_2] - self.radius
 
-            return "rectangle", top_left, bottom_right, 2 * self.length * self.radius
+            self._frontal_surface = Rectangle(left, right, top, bottom)
 
         elif self.orientation == axis_2:
-            top_left = (self.position[axis_1] - self.radius,
-                        self.position[axis_2] + self.length / 2
-                        )
-            bottom_right = (self.position[axis_1] + self.radius,
-                            self.position[axis_2] - self.length / 2
-                            )
+            left = self.position[axis_1] - self.radius
+            top = self.position[axis_2] + self.length / 2
+            right = self.position[axis_1] + self.radius
+            bottom = self.position[axis_2] - self.length / 2
 
-            return "rectangle", top_left, bottom_right, 2 * self.length * self.radius
+            area = 2 * self.length * self.radius
+
+            self._frontal_surface = Rectangle(left, right, top, bottom)
 
         else:
-            centre = self.position[axis_1], self.position[axis_2]
-            return "circle", centre, self.radius, np.pi * self.radius ** 2
+            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+                                           self.radius)
 
-    def smallest_coordinate(self, axis: int):
+    def set_smallest_coordinate(self, axis: int):
         if self.orientation == axis:
-            return self.position[axis] - self.length / 2
+            self._smallest_coordinate = self.position[axis] - self.length / 2
 
         else:
-            return self.position[axis] - self.radius
+            self._smallest_coordinate = self.position[axis] - self.radius
 
     def calculate_base_drag(self, direction: int):
         if direction == self.orientation:
@@ -151,21 +192,18 @@ class Cuboid(Part):
     def __repr__(self):
         return f"[Cuboid: {self.position}, dims={self.dimensions}]"
 
-    def frontal_surface(self, axis_1: int, axis_2: int):
-        top_left = (self.position[axis_1] - self.dimensions[axis_1] / 2,
-                    self.position[axis_2] + self.dimensions[axis_2] / 2
-                    )
+    def set_frontal_surface(self, axis_1: int, axis_2: int):
+        left = self.position[axis_1] - self.dimensions[axis_1] / 2
+        top = self.position[axis_2] + self.dimensions[axis_2] / 2
+        right = self.position[axis_1] + self.dimensions[axis_1] / 2
+        bottom = self.position[axis_2] - self.dimensions[axis_2] / 2
 
-        bottom_right = (self.position[axis_1] + self.dimensions[axis_1] / 2,
-                        self.position[axis_2] - self.dimensions[axis_2] / 2
-                        )
+        area = self.dimensions[axis_1] * self.dimensions[axis_2]
 
-        return ("rectangle", top_left, bottom_right,
-                self.dimensions[axis_1] * self.dimensions[axis_2]
-                )
+        self._frontal_surface = Rectangle(left, right, top, bottom)
 
-    def smallest_coordinate(self, axis: int):
-        return self.position[axis] - self.dimensions[axis] / 2
+    def set_smallest_coordinate(self, axis: int):
+        self._smallest_coordinate = self.position[axis] - self.dimensions[axis] / 2
 
     def calculate_base_drag(self, direction: int):
         [axis_1, axis_2] = [axis for axis in [0, 1, 2] if axis != direction]
@@ -194,36 +232,17 @@ class IceCreamCone(Part):
         return f"[IceCream cone: r={self.radius}, l_co={self.length_cylinder}, " \
                f"l_co={self.length_cone}, {self.orientation}]"
 
-    def frontal_surface(self, axis_1: int, axis_2: int):
-        if self.orientation == axis_1:
-            top_left = (self.position[axis_1],
-                        self.position[axis_2] + self.radius
-                        )
-            bottom_right = (self.position[axis_1] + self.length_cylinder,
-                            self.position[axis_2] - self.radius
-                            )
-            back_point = (self.position[axis_1] + self.length_cylinder + self.length_cone,
-                          self.position[axis_2])
-
-            return "cone", self.position, top_left, bottom_right, back_point
-
-        elif self.orientation == axis_2:
-            top_left = (self.position[axis_1] - self.radius,
-                        self.position[axis_2] + self.length_cylinder
-                        )
-            bottom_right = (self.position[axis_1] + self.radius,
-                            self.position[axis_2]
-                            )
-            back_point = (self.position[axis_1],
-                          self.position[axis_2] + self.length_cylinder + self.length_cone)
-
-            return "cone", self.position, top_left, bottom_right, back_point
+    def set_frontal_surface(self, axis_1: int, axis_2: int):
+        if self.orientation not in (axis_1, axis_2):
+            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+                                           self.radius)
 
         else:
-            return "circle", self.position, self.radius
+            raise ValueError(f"Frontal surface calculation in {axis_1}{axis_2} plane not "
+                             f"supported for IceCreamCone")
 
-    def smallest_coordinate(self, axis: int):
-        return self.position[axis] - self.radius
+    def set_smallest_coordinate(self, axis: int):
+        self._smallest_coordinate = self.position[axis] - self.radius
 
     def calculate_base_drag(self, direction: int):
         if self.orientation == direction:
