@@ -5,31 +5,7 @@ Definition of all the object classes for the drag tool
 import numpy as np
 
 from .equations import drag_coefficient_function
-
-
-class Rectangle:
-    """
-
-    """
-
-    def __init__(self, left, right, top, bottom):
-        self.left, self.right, self.top, self.bottom = left, right, top, bottom
-
-        self.area = (self.right - self.left) * (self.top - self.bottom)
-
-    def __repr__(self):
-        return f"Rectangle: [lr=({self.left}, {self.right}), tb=({self.top}, {self.bottom})]"
-
-
-class Circle:
-    """
-
-    """
-
-    def __init__(self, x_centre, y_centre, radius):
-        self.x_centre, self.y_centre, self.radius = x_centre, y_centre, radius
-
-        self.area = np.pi * self.radius ** 2
+from .shapes import Rectangle, Circle
 
 
 class Part:
