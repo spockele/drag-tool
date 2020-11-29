@@ -35,6 +35,30 @@ class Circle:
 
         self.area = np.pi * self.radius ** 2
 
+    def __eq__(self, other):
+        if isinstance(other, Circle):
+            return self.radius == other.radius
+        else:
+            raise TypeError(f"Cannot compare Circle to {type(other)}")
+
+    def __lt__(self, other):
+        if isinstance(other, Circle):
+            return self.radius < other.radius
+        else:
+            raise TypeError(f"Cannot compare Circle to {type(other)}")
+
+    def __le__(self, other):
+        return self < other or self == other
+
+    def transform(self, x_shift, y_shift):
+        return self.x_centre + x_shift, self.y_centre + y_shift
+
+    def in_circle_x(self, x):
+        return self.x_centre - self.radius < x < self.x_centre + self.radius
+
+    def in_circle_y(self, y):
+        return self.y_centre - self.radius < y < self.y_centre + self.radius
+
 
 class Line:
     """
@@ -53,8 +77,8 @@ class Line:
         return self.x1 + shift_x, self.y1 + shift_y, self.x2 + shift_x, self.y2 + shift_y
 
 
-def intersection_rectangles(rectangle_1: Rectangle, rectangle_2: Rectangle):
-    return
+def on_line(line: Line, x, y):
+    return line.x1 <= x <= line.x2 and line.y1 <= y <= line.y2
 
 
 def sign(x):
@@ -108,8 +132,64 @@ def area_triangle(a, b, c):
     return round(np.sqrt(s * (s - a) * (s - b) * (s - c)), 3)
 
 
-def on_line(line: Line, x, y):
-    return line.x1 <= x <= line.x2 and line.y1 <= y <= line.y2
+def find_inside_vertices(circle, rectangle):
+    dx2_left = (rectangle.left - circle.x_centre) ** 2
+    dx2_right = (rectangle.right - circle.x_centre) ** 2
+    dy2_top = (rectangle.top - circle.y_centre) ** 2
+    dy2_bottom = (rectangle.bottom - circle.y_centre) ** 2
+
+    distances = (np.sqrt(dx2_left + dy2_top), np.sqrt(dx2_right + dy2_top),
+                 np.sqrt(dx2_left + dy2_bottom), np.sqrt(dx2_right + dy2_bottom)
+                 )
+
+    vertices = ((rectangle.left, rectangle.top), (rectangle.right, rectangle.top),
+                (rectangle.left, rectangle.bottom), (rectangle.right, rectangle.bottom)
+                )
+
+    inside_vertices = [vertices[i] for i, distance in enumerate(distances)
+                       if distance < circle.radius]
+
+    outside_vertices = [vertices[i] for i, distance in enumerate(distances)
+                        if not distance < circle.radius]
+
+    return inside_vertices, outside_vertices
+
+
+def find_intersection(circle, rectangle):
+    intersection = []
+    intersect_lines = []
+
+    for line in rectangle.lines:
+        intersect = intersection_line_circle(line, circle)
+
+        if isinstance(intersect, tuple):
+
+            if on_line(line, intersect[0], intersect[1]):
+                intersection.append(intersect[0])
+                intersection.append(intersect[1])
+                intersect_lines.append(line)
+
+            if on_line(line, intersect[2], intersect[3]):
+                intersection.append(intersect[2])
+                intersection.append(intersect[3])
+                intersect_lines.append(line)
+
+    return intersection, intersect_lines
+
+
+def circle_no_intersection(circle1, circle2):
+    distance_centres = line_length(circle1.x_centre, circle1.y_centre,
+                                   circle2.x_centre, circle2.y_centre)
+    if circle1 < circle2:
+        area = circle1.area if distance_centres < circle2.radius else 0
+
+    elif circle2 < circle1:
+        area = circle2.area if distance_centres < circle1.radius else 0
+
+    else:
+        area = 0
+
+    return area
 
 
 def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
@@ -122,11 +202,13 @@ def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
         if len(intersection) == 4:
             area = area_circular_segment(intersection, circle)
 
-        elif len(intersection) == 8:
-            circular_area1 = area_circular_segment(intersection[0:4], circle)
-            circular_area2 = area_circular_segment(intersection[4:8], circle)
+        elif len(intersection) > 4:
+            subtract_area = 0
+            for index in range(len(intersection) // 4):
+                intersect = intersection[4*index:4*index+4]
+                subtract_area += area_circular_segment(intersect, circle)
 
-            area = circle.area - circular_area1 - circular_area2
+            area = circle.area - subtract_area
 
         elif (rectangle.left < circle.x_centre < rectangle.right
               and rectangle.bottom < circle.y_centre < rectangle.top):
@@ -185,49 +267,70 @@ def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
     else:
         area = rectangle.area
 
+    return round(area, 2)
+
+
+def intersection_circle_circle(circle1: Circle, circle2: Circle):
+    x1, y1 = circle1.transform(-circle2.x_centre, -circle2.y_centre)
+
+    if x1 == y1 == 0:
+        area = circle1.area if circle1 <= circle2 else circle2.area
+
+    elif y1 == 0:
+        x = (1 / (2 * x1)) * (x1 ** 2 + circle2.radius ** 2 - circle1.radius ** 2)
+
+        if circle1.in_circle_x(x) and circle2.in_circle_x(x):
+            y_abs1 = np.sqrt((circle1.radius ** 2) - (x - x1) ** 2)
+            y_abs2 = np.sqrt((circle2.radius ** 2) - x ** 2)
+
+            if y_abs1 == y_abs2 != 0:
+                intersection = (x, y_abs1, x, -y_abs1)
+
+                area = (area_circular_segment(intersection, circle1) +
+                        area_circular_segment(intersection, circle2))
+
+            else:
+                area = circle_no_intersection(circle1, circle2)
+
+        else:
+            area = circle_no_intersection(circle1, circle2)
+
+    else:
+        p = (1 / (2 * y1) * (x1 ** 2 + y1 ** 2 - circle1.radius ** 2 + circle2.radius ** 2))
+
+        a = 2
+        b = -2 * p * (x1 / y1)
+        c = p ** 2 - circle2.radius ** 2
+
+        discriminant = b ** 2 - 4 * a * c
+
+        if discriminant <= 0:
+            area = circle_no_intersection(circle1, circle2)
+
+        else:
+            x1_int = (-b + np.sqrt(discriminant)) / (2 * a)
+            y1_int = - (circle1.x_centre / circle1.y_centre) * x1_int + p
+
+            x2_int = (-b - np.sqrt(discriminant)) / (2 * a)
+            y2_int = - (circle1.x_centre / circle1.y_centre) * x2_int + p
+
+            intersection = [x1_int, y1_int, x2_int, y2_int]
+            circular_area1 = area_circular_segment(intersection, circle1)
+            circular_area2 = area_circular_segment(intersection, circle2)
+
+            area = circular_area1 + circular_area2
+
     return round(area, 3)
 
 
-def find_inside_vertices(circle, rectangle):
-    dx2_left = (rectangle.left - circle.x_centre) ** 2
-    dx2_right = (rectangle.right - circle.x_centre) ** 2
-    dy2_top = (rectangle.top - circle.y_centre) ** 2
-    dy2_bottom = (rectangle.bottom - circle.y_centre) ** 2
+def intersection_rectangles(rectangle_1: Rectangle, rectangle_2: Rectangle):
+    left = max(rectangle_1.left, rectangle_2.left)
+    right = min(rectangle_1.right, rectangle_2.right)
+    bottom = max(rectangle_1.bottom, rectangle_2.bottom)
+    top = min(rectangle_1.top, rectangle_2.top)
 
-    distances = (np.sqrt(dx2_left + dy2_top), np.sqrt(dx2_right + dy2_top),
-                 np.sqrt(dx2_left + dy2_bottom), np.sqrt(dx2_right + dy2_bottom)
-                 )
+    smallest_area = min(rectangle_1.area, rectangle_2.area)
 
-    vertices = ((rectangle.left, rectangle.top), (rectangle.right, rectangle.top),
-                (rectangle.left, rectangle.bottom), (rectangle.right, rectangle.bottom)
-                )
+    overlap = Rectangle(left, right, top, bottom)
 
-    inside_vertices = [vertices[i] for i, distance in enumerate(distances)
-                       if distance < circle.radius]
-
-    outside_vertices = [vertices[i] for i, distance in enumerate(distances)
-                        if not distance < circle.radius]
-
-    return inside_vertices, outside_vertices
-
-
-def find_intersection(circle, rectangle):
-    intersection = []
-    intersect_lines = []
-
-    for line in rectangle.lines:
-        intersect = intersection_line_circle(line, circle)
-
-        if isinstance(intersect, tuple):
-
-            if on_line(line, intersect[0], intersect[1]):
-                intersection.append(intersect[0])
-                intersection.append(intersect[1])
-                intersect_lines.append(line)
-
-            if on_line(line, intersect[2], intersect[3]):
-                intersection.append(intersect[2])
-                intersection.append(intersect[3])
-                intersect_lines.append(line)
-
-    return intersection, intersect_lines
+    return overlap.area if smallest_area >= overlap.area > 0 else 0
