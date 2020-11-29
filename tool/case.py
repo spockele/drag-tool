@@ -2,8 +2,11 @@
 Module with the Case class for the simulation case.
 """
 
+import numpy as np
 
-from .objects import Sphere, Cylinder, Cuboid, IceCreamCone
+
+from .objects import Sphere, Cylinder, Cuboid, IceCreamCone, Disk
+from . import shapes
 
 
 class Case:
@@ -12,14 +15,18 @@ class Case:
     """
     def __init__(self, case: str):
         self.parts = list()
-        self.dynamic_pressure = int()
+        self.density = float()
+        self.velocity = float()
         self.reynolds_number = int()
         self.flow_direction = int()
+
+        self.slowdown_xp = [0, 1, 10]
+        self.slowdown_fp = [.05, .9, 1]
 
         self.load_case(case)
 
     def __repr__(self):
-        return f"Drag Analysis Case: [q={self.dynamic_pressure}, Re={self.reynolds_number}, " \
+        return f"Drag Analysis Case: [rho={self.density}, v={self.velocity} Re={self.reynolds_number}, " \
                f"flow direction={self.flow_direction}] with parts: {self.parts}"
 
     def load_case(self, case: str):
@@ -27,16 +34,17 @@ class Case:
         lines = [line.strip(",\n").split(", ") for line in f.readlines()]
         f.close()
 
-        self.dynamic_pressure, self.reynolds_number, self.flow_direction = \
-            (int(value) for value in lines[2])
+        self.density, self.velocity = (float(value) for value in lines[2][0:2])
+        self.reynolds_number, self.flow_direction = (int(value) for value in lines[2][2:4])
 
         line = lines[5]
         count = 5
         while line[0] != 'Cylinders':
-            position = tuple(float(value) for value in line[0:3])
-            radius = float(line[3])
-            self.parts.append(Sphere(self.reynolds_number, self.dynamic_pressure,
-                                     position, radius))
+            if "#" not in line[0]:
+                position = tuple(float(value) for value in line[0:3])
+                radius = float(line[3])
+                self.parts.append(Sphere(self.reynolds_number, self.density, self.velocity,
+                                         position, radius))
 
             count += 1
             line = lines[count]
@@ -44,11 +52,12 @@ class Case:
         count += 2
         line = lines[count]
         while line[0] != 'Cuboids':
-            position = tuple(float(value) for value in line[0:3])
-            radius, length = tuple(float(value) for value in line[3:5])
-            orientation = int(line[5])
-            self.parts.append(Cylinder(self.reynolds_number, self.dynamic_pressure,
-                                       position, radius, length, orientation))
+            if "#" not in line[0]:
+                position = tuple(float(value) for value in line[0:3])
+                radius, length = tuple(float(value) for value in line[3:5])
+                orientation = int(line[5])
+                self.parts.append(Cylinder(self.reynolds_number, self.density, self.velocity,
+                                           position, radius, length, orientation))
 
             count += 1
             line = lines[count]
@@ -56,10 +65,25 @@ class Case:
         count += 2
         line = lines[count]
         while line[0] != 'IceCream Cones':
-            position = tuple(float(value) for value in line[0:3])
-            dimensions = tuple(float(value) for value in line[3:6])
-            self.parts.append(Cuboid(self.reynolds_number, self.dynamic_pressure,
-                                     position, dimensions))
+            if "#" not in line[0]:
+                position = tuple(float(value) for value in line[0:3])
+                dimensions = tuple(float(value) for value in line[3:6])
+                self.parts.append(Cuboid(self.reynolds_number, self.density, self.velocity,
+                                         position, dimensions))
+
+            count += 1
+            line = lines[count]
+
+        count += 2
+        line = lines[count]
+        while line[0] != 'Disks':
+            if "#" not in line[0]:
+                position = tuple(float(value) for value in line[0:3])
+                radius, length_cylinder, length_cone = tuple(float(value) for value in line[3:6])
+                orientation = int(line[6])
+                self.parts.append(IceCreamCone(self.reynolds_number, self.density, self.velocity,
+                                               position, radius, length_cylinder, length_cone,
+                                               orientation))
 
             count += 1
             line = lines[count]
@@ -67,21 +91,52 @@ class Case:
         count += 2
         line = lines[count]
         while line[0] != '':
-            position = tuple(float(value) for value in line[0:3])
-            radius, length_cylinder, length_cone = tuple(float(value) for value in line[3:6])
-            orientation = int(line[6])
-            self.parts.append(IceCreamCone(self.reynolds_number, self.dynamic_pressure,
-                                           position, radius, length_cylinder, length_cone,
-                                           orientation))
+            if "#" not in line[0]:
+                position = tuple(float(value) for value in line[0:3])
+                radius = float(line[3])
+                orientation = tuple(int(value) for value in line[4:6])
+
+                self.parts.append(Disk(self.reynolds_number, self.density, self.velocity,
+                                       position, radius, orientation))
 
             count += 1
             line = lines[count]
 
     def run_case(self):
-        perpendicular_plane = [0, 1, 2]
+        perpendicular_plane = [0, 2, 1]
         perpendicular_plane.remove(self.flow_direction)
 
         for part in self.parts:
             part.set_frontal_surface(*perpendicular_plane)
+            part.set_characteristic_length(self.flow_direction)
+            part.set_smallest_coordinate(self.flow_direction)
 
         self.parts.sort()
+        total_area = 0.
+
+        for index_1, part in enumerate(self.parts):
+            surface = part.get_frontal_surface()
+
+            for index_2, other_part in enumerate(self.parts[index_1+1:]):
+                other_surface = other_part.get_frontal_surface()
+
+                area = surface.intersection(other_surface)
+
+                if area != 0:
+                    distance = other_part.position[self.flow_direction] - \
+                               part.position[self.flow_direction]
+                    x = distance / part.get_characteristic_length()
+
+                    slowdown = round(np.interp(x, self.slowdown_xp, self.slowdown_fp), 4)
+
+                    other_part.set_wake_factor((slowdown ** 2 * area + other_surface.area - area) /
+                                               other_surface.area)
+
+        total_drag = 0.
+        for part in self.parts:
+            part.apply_wake_factor(self.flow_direction)
+            total_drag += part.drag
+
+        drag_area = total_drag / (0.5 * self.density * self.velocity ** 2)
+
+        return self.velocity, total_drag, drag_area
