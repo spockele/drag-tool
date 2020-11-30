@@ -12,6 +12,7 @@ class Part:
     """
     The general aerodynamic model for all objects defined below
     """
+    friction_coefficient = 0.002
 
     def __init__(self, drag_range: tuple, reynolds_number: int, density: float, velocity: float,
                  position: tuple, wet_area: float):
@@ -36,7 +37,7 @@ class Part:
 
     def apply_wake_factor(self, direction: int):
         base_drag = self.calculate_base_drag(direction)
-        friction_drag = 0.05 * self.wet_area * self.dynamic_pressure
+        friction_drag = self.friction_coefficient * self.wet_area * self.dynamic_pressure
         pressure_drag = self.wake_factor * (base_drag - friction_drag)
 
         self.drag = friction_drag + pressure_drag
@@ -283,7 +284,7 @@ class Disk(Part):
     """
 
     """
-    drag_range = (0.01, 0.01)
+    drag_range = (0.005, 0.005)
 
     def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
                  radius: float, orientation: tuple):
@@ -329,7 +330,7 @@ class Disk(Part):
 
     def calculate_base_drag(self, direction: int):
         if direction in self.orientation:
-            return self.drag_coefficient * self.wet_area * self.dynamic_pressure
+            return self.friction_coefficient * self.wet_area * self.dynamic_pressure
         else:
             raise ValueError(f"Drag calculation along {direction} axis not supported for "
                              f"Disk")

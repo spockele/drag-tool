@@ -20,8 +20,8 @@ class Case:
         self.reynolds_number = int()
         self.flow_direction = int()
 
-        self.slowdown_xp = [0, 1, 10]
-        self.slowdown_fp = [.05, .9, 1]
+        self.slowdown_xp = [0, 3, 10]
+        self.slowdown_fp = [.05, .85, .9]
 
         self.load_case(case)
 
