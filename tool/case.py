@@ -6,7 +6,6 @@ import numpy as np
 
 
 from .objects import Sphere, Cylinder, Cuboid, IceCreamCone, Disk
-from . import shapes
 
 
 class Case:
@@ -112,7 +111,6 @@ class Case:
             part.set_smallest_coordinate(self.flow_direction)
 
         self.parts.sort()
-        total_area = 0.
 
         for index_1, part in enumerate(self.parts):
             surface = part.get_frontal_surface()
