@@ -4,7 +4,6 @@ Definition of all the object classes for the drag tool
 
 import numpy as np
 
-from .equations import drag_coefficient_function
 from .shapes import Rectangle, Circle
 
 
@@ -12,14 +11,16 @@ class Part:
     """
     The general aerodynamic model for all objects defined below
     """
-    friction_coefficient = 0.002
+    friction_coefficient = 0.02
 
-    def __init__(self, drag_range: tuple, reynolds_number: int, density: float, velocity: float,
-                 position: tuple, wet_area: float):
-        self.dynamic_pressure = 0.5 * density * velocity ** 2
+    def __init__(self, density: float, velocity: float, position: tuple, wet_area: float):
+        self.velocity = velocity
+        self.dynamic_pressure = 0.5 * density * self.velocity ** 2
+
+        self.slowdown = 1
+        self.wake_slowdown = 1
         self.wake_factor = 1
-        self.local_velocity = velocity
-        self.drag_coefficient = drag_coefficient_function(reynolds_number, drag_range)
+
         self.wet_area = wet_area
 
         self.position = position
@@ -32,12 +33,19 @@ class Part:
         self._characteristic_length = None
         self.drag = None
 
-    def set_wake_factor(self, value: float):
-        self.wake_factor = value
+    def set_slowdown(self, slowdown: float, area: float):
+        self.slowdown = slowdown
+        self.wake_slowdown = ((self.slowdown * area +
+                               self._frontal_surface.area - area) /
+                              self._frontal_surface.area)
+        self.wake_factor = (((self.slowdown ** 2) * area +
+                             self._frontal_surface.area - area) /
+                            self._frontal_surface.area)
 
-    def apply_wake_factor(self, direction: int):
+    def apply_slowdown(self, direction: int):
         base_drag = self.calculate_base_drag(direction)
-        friction_drag = self.friction_coefficient * self.wet_area * self.dynamic_pressure
+        friction_drag = min(self.friction_coefficient * self.wet_area * self.dynamic_pressure,
+                            base_drag)
         pressure_drag = self.wake_factor * (base_drag - friction_drag)
 
         self.drag = friction_drag + pressure_drag
@@ -82,14 +90,13 @@ class Sphere(Part):
     Aerodynamic model for a sphere
         The reference area is the frontal area
     """
-    drag_range = (0.09, 0.18)
+    drag_coefficient = 0.15
 
-    def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
-                 radius: float):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float):
         self.radius = radius
         wet_area = 4 * np.pi * self.radius ** 2
 
-        super().__init__(self.drag_range, reynolds_number, density, velocity, position, wet_area)
+        super().__init__(density, velocity, position, wet_area)
 
     def __repr__(self):
         return f"Sphere: [{self.position}, r={self.radius}]"
@@ -119,17 +126,17 @@ class Cylinder(Part):
         The reference area is the frontal area
         Orientation indicates along which axis the cylinder is aligned
     """
-    drag_range = (0.3, 0.7)
+    drag_coefficient = 0.4
 
-    def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
-                 radius: float, length: float, orientation: int):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float,
+                 length: float, orientation: int):
         self.radius = radius
         self.length = length
         self.orientation = orientation
 
         wet_area = 2 * np.pi * self.radius ** 2 + 2 * np.pi * self.radius * self.length
 
-        super().__init__(self.drag_range, reynolds_number, density, velocity, position, wet_area)
+        super().__init__(density, velocity, position, wet_area)
 
     def __repr__(self):
         return f"Cylinder: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
@@ -179,7 +186,7 @@ class Cylinder(Part):
 
     def calculate_base_drag(self, direction: int):
         if direction == self.orientation:
-            return 0.9 * (np.pi * self.radius ** 2) * self.dynamic_pressure
+            return Cuboid.drag_coefficient * (np.pi * self.radius ** 2) * self.dynamic_pressure
         else:
             return self.drag_coefficient * (2 * self.length * self.radius) * self.dynamic_pressure
 
@@ -189,10 +196,9 @@ class Cuboid(Part):
     Aerodynamic model for a cuboid part
         The reference area is the frontal area
     """
-    drag_range = (0.9, 0.9)
+    drag_coefficient = 0.8
 
-    def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
-                 dimensions: tuple):
+    def __init__(self, density: float, velocity: float, position: tuple, dimensions: tuple):
         self.dimensions = dimensions
 
         wet_area = 2 * (self.dimensions[0] * self.dimensions[1] +
@@ -200,7 +206,7 @@ class Cuboid(Part):
                         self.dimensions[0] * self.dimensions[2]
                         )
 
-        super().__init__(self.drag_range, reynolds_number, density, velocity, position, wet_area)
+        super().__init__(density, velocity, position, wet_area)
 
     def __repr__(self):
         return f"Cuboid: [{self.position}, dims={self.dimensions}]"
@@ -229,10 +235,10 @@ class IceCreamCone(Part):
     """
 
     """
-    drag_range = (0.05, 0.07)
+    drag_coefficient = 0.05
 
-    def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
-                 radius: float, length_cylinder: float, length_cone: float, orientation: int):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float,
+                 length_cylinder: float, length_cone: float, orientation: int):
         self.radius = radius
         self.length_cylinder = length_cylinder
         self.length_cone = length_cone
@@ -242,7 +248,7 @@ class IceCreamCone(Part):
                     2 * np.pi * self.radius * self.length_cylinder +
                     np.pi * self.radius * np.sqrt(self.length_cone ** 2 + self.radius ** 2))
 
-        super().__init__(self.drag_range, reynolds_number, density, velocity, position, wet_area)
+        super().__init__(density, velocity, position, wet_area)
 
     def __repr__(self):
         return f"IceCream cone: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
@@ -284,16 +290,16 @@ class Disk(Part):
     """
 
     """
-    drag_range = (0.005, 0.005)
 
-    def __init__(self, reynolds_number: int, density: float, velocity: float, position: tuple,
-                 radius: float, orientation: tuple):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float,
+                 orientation: tuple):
         self.radius = radius
         self.orientation = orientation
         self.wet_area = 2 * np.pi * self.radius ** 2
 
-        super().__init__(self.drag_range, reynolds_number, density, velocity,
-                         position, self.wet_area)
+        super().__init__(density, velocity, position, self.wet_area)
+
+        self.friction_coefficient = 0.005
 
     def __repr__(self):
         return f"Disk: [{self.position}, r={self.radius}, {self.orientation}]"
