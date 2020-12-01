@@ -13,7 +13,7 @@ class Rectangle:
     def __init__(self, left, right, top, bottom):
         self.left, self.right, self.top, self.bottom = left, right, top, bottom
 
-        self.area = (self.right - self.left) * (self.top - self.bottom)
+        self.area = round((self.right - self.left) * (self.top - self.bottom), 3)
 
         self.lines = (Line(self.left, self.top, self.right, self.top),
                       Line(self.left, self.bottom, self.right, self.bottom),
@@ -41,7 +41,7 @@ class Circle:
     def __init__(self, x_centre, y_centre, radius):
         self.x_centre, self.y_centre, self.radius = x_centre, y_centre, radius
 
-        self.area = np.pi * self.radius ** 2
+        self.area = round(np.pi * self.radius ** 2, 3)
 
     def __repr__(self):
         return f"Circle: [{(self.x_centre, self.y_centre)}, r={self.radius}]"
@@ -288,7 +288,7 @@ def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
     else:
         area = rectangle.area
 
-    return round(area, 2)
+    return round(area, 3)
 
 
 def intersection_circle_circle(circle1: Circle, circle2: Circle):
