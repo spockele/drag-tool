@@ -180,6 +180,7 @@ def find_inside_vertices(circle, rectangle):
 def find_intersection(circle, rectangle):
     intersection = []
     intersect_lines = []
+    print("Start")
 
     for line in rectangle.lines:
         intersect = intersection_line_circle(line, circle)
@@ -196,7 +197,20 @@ def find_intersection(circle, rectangle):
                 intersection.append(intersect[3])
                 intersect_lines.append(line)
 
-    return intersection, intersect_lines
+    result = find_double_intersections(intersection)
+
+    return result, intersect_lines
+
+
+def find_double_intersections(intersection):
+    intersects = []
+    result = []
+    for index, _ in enumerate(intersection[::2]):
+        intersect = round(intersection[2 * index], 3), round(intersection[2 * index + 1], 3)
+        if intersect not in intersects:
+            intersects.append(intersect)
+            result += [*intersect]
+    return result
 
 
 def circle_no_intersection(circle1, circle2):
