@@ -24,6 +24,12 @@ class Rectangle:
     def __repr__(self):
         return f"Rectangle: [lr=({self.left}, {self.right}), tb=({self.top}, {self.bottom})]"
 
+    def in_rectangle_x(self, x):
+        return self.left <= x <= self.right
+
+    def in_rectangle_y(self, y):
+        return self.bottom <= y <= self.top
+
     def intersection(self, other):
         if isinstance(other, Rectangle):
             return intersection_rectangles(other, self)
@@ -172,7 +178,7 @@ def find_inside_vertices(circle, rectangle):
                        if distance < circle.radius]
 
     outside_vertices = [vertices[i] for i, distance in enumerate(distances)
-                        if not distance < circle.radius]
+                        if not distance >= circle.radius]
 
     return inside_vertices, outside_vertices
 
@@ -180,7 +186,6 @@ def find_inside_vertices(circle, rectangle):
 def find_intersection(circle, rectangle):
     intersection = []
     intersect_lines = []
-    print("Start")
 
     for line in rectangle.lines:
         intersect = intersection_line_circle(line, circle)
@@ -267,7 +272,6 @@ def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
 
     elif len(inside_vertices) == 2:
         intersection, intersect_lines = find_intersection(circle, rectangle)
-
         circular_area = area_circular_segment(intersection, circle)
 
         p1 = intersection[0], intersection[1]
@@ -370,8 +374,17 @@ def intersection_rectangles(rectangle_1: Rectangle, rectangle_2: Rectangle):
     bottom = max(rectangle_1.bottom, rectangle_2.bottom)
     top = min(rectangle_1.top, rectangle_2.top)
 
-    smallest_area = min(rectangle_1.area, rectangle_2.area)
+    in_rectangle1 = (rectangle_1.in_rectangle_x(left) and rectangle_1.in_rectangle_x(right) and
+                     rectangle_1.in_rectangle_y(top) and rectangle_1.in_rectangle_y(bottom)
+                     )
+    in_rectangle2 = (rectangle_2.in_rectangle_x(left) and rectangle_2.in_rectangle_x(right) and
+                     rectangle_2.in_rectangle_y(top) and rectangle_2.in_rectangle_y(bottom)
+                     )
 
-    overlap = Rectangle(left, right, top, bottom)
+    if in_rectangle1 and in_rectangle2:
+        overlap = Rectangle(left, right, top, bottom)
+        area = overlap.area
+    else:
+        area = 0
 
-    return overlap.area if smallest_area >= overlap.area > 0 else 0
+    return area

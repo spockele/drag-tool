@@ -104,7 +104,7 @@ class Sphere(Part):
         self.__name__ = name
 
     def __repr__(self):
-        return f"Sphere: [{self.position}, r={self.radius}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
@@ -113,7 +113,9 @@ class Sphere(Part):
         :param axis_2: Second axis defining the plane
         :return: None
         """
-        self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2], self.radius)
+        self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                       round(self.position[axis_2], 3),
+                                       self.radius)
 
     def set_smallest_coordinate(self, axis: int):
         self._smallest_coordinate = self.position[axis] - self.radius
@@ -146,7 +148,7 @@ class Cylinder(Part):
         self.__name__ = name
 
     def __repr__(self):
-        return f"Cylinder: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
@@ -159,23 +161,24 @@ class Cylinder(Part):
                 The surface area)
         """
         if self.orientation == axis_1:
-            left = self.position[axis_1] - self.length / 2
-            top = self.position[axis_2] + self.radius
-            right = self.position[axis_1] + self.length / 2
-            bottom = self.position[axis_2] - self.radius
+            left = round(self.position[axis_1] - self.length / 2, 3)
+            top = round(self.position[axis_2] + self.radius, 3)
+            right = round(self.position[axis_1] + self.length / 2, 3)
+            bottom = round(self.position[axis_2] - self.radius, 3)
 
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         elif self.orientation == axis_2:
-            left = self.position[axis_1] - self.radius
-            top = self.position[axis_2] + self.length / 2
-            right = self.position[axis_1] + self.radius
-            bottom = self.position[axis_2] - self.length / 2
+            left = round(self.position[axis_1] - self.radius, 3)
+            top = round(self.position[axis_2] + self.length / 2, 3)
+            right = round(self.position[axis_1] + self.radius, 3)
+            bottom = round(self.position[axis_2] - self.length / 2, 3)
 
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         else:
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
 
     def set_smallest_coordinate(self, axis: int):
@@ -219,13 +222,13 @@ class Cuboid(Part):
         self.__name__ = name
 
     def __repr__(self):
-        return f"Cuboid: [{self.position}, dims={self.dimensions}]"
+        return f"{self.__name__}: [{self.position}, dims={self.dimensions}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
-        left = self.position[axis_1] - self.dimensions[axis_1] / 2
-        top = self.position[axis_2] + self.dimensions[axis_2] / 2
-        right = self.position[axis_1] + self.dimensions[axis_1] / 2
-        bottom = self.position[axis_2] - self.dimensions[axis_2] / 2
+        left = round(self.position[axis_1] - self.dimensions[axis_1] / 2, 3)
+        top = round(self.position[axis_2] + self.dimensions[axis_2] / 2, 3)
+        right = round(self.position[axis_1] + self.dimensions[axis_1] / 2, 3)
+        bottom = round(self.position[axis_2] - self.dimensions[axis_2] / 2, 3)
 
         self._frontal_surface = Rectangle(left, right, top, bottom)
 
@@ -263,12 +266,13 @@ class IceCreamCone(Part):
         self.__name__ = name
 
     def __repr__(self):
-        return f"IceCream cone: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
+        return f"{self.__name__}: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
                f"l_co={self.length_cone}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         if self.orientation not in (axis_1, axis_2):
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
 
         else:
@@ -316,24 +320,25 @@ class Disk(Part):
         self.__name__ = name
 
     def __repr__(self):
-        return f"Disk: [{self.position}, r={self.radius}, {self.orientation}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         if axis_1 in self.orientation and axis_2 in self.orientation:
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
         elif axis_1 in self.orientation:
-            left = self.position[axis_1] - self.radius
-            right = self.position[axis_1] + self.radius
-            top = self.position[axis_2] + 0.005
-            bottom = self.position[axis_2] - 0.005
+            left = round(self.position[axis_1] - self.radius, 3)
+            right = round(self.position[axis_1] + self.radius, 3)
+            top = round(self.position[axis_2] + 0.005, 3)
+            bottom = round(self.position[axis_2] - 0.005, 3)
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         else:
-            left = self.position[axis_2] - 0.005
-            right = self.position[axis_2] + 0.005
-            top = self.position[axis_1] + self.radius
-            bottom = self.position[axis_1] - self.radius
+            left = round(self.position[axis_2] - 0.005, 3)
+            right = round(self.position[axis_2] + 0.005, 3)
+            top = round(self.position[axis_1] + self.radius, 3)
+            bottom = round(self.position[axis_1] - self.radius, 3)
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
     def set_smallest_coordinate(self, axis: int):
