@@ -38,6 +38,12 @@ if __name__ == '__main__':
     elif case == 'slowdown' or case == 's':
         Case('test').plot_slowdown()
 
+    elif case == 'all' or case == 'a':
+        for case in ('quadcopter', 'helipack', 'icecream'):
+            runner = Case(case)
+            runner.run_case()
+            runner.write_to_file()
+
     elif case == 'q':
         exit()
 
