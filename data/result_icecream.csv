@@ -1,8 +1,13 @@
 Case, icecream,
-Drag, 12.125 N,
-Drag Area, 0.161 m2,
 
-cabin, D = 6.494N , V/V_flow = 1,
-rotor, D = 2.371N , V/V_flow = 1,
-motor, D = 1.811N , V/V_flow = 1,
-shaft, D = 1.449N , V/V_flow = 1,
+Drag, 12.125, N,
+Drag Area, 0.161, m2,
+
+Centre of Pressure, x, y, z,
+Position [m], 0.35, 0.329, 0.0,
+
+Part, Drag [N], V/V_flow [-],
+cabin, 6.494, 1,
+rotor, 2.371, 1,
+motor, 1.811, 1,
+shaft, 1.449, 1,
