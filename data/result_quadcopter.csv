@@ -5,7 +5,7 @@ Drag Area [m2], 0.637,,,
 ,,,,
 Centre of Pressure, x, y, z,
 Position [m], -0.049, 0.125, 0.0,
-
+,,,
 Part, Drag [N], V/V_flow [-],
 left front rotor, 0.926, 1,,
 right front rotor, 0.926, 1,,

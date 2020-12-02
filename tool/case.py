@@ -40,7 +40,7 @@ class Case:
                  f"Drag [N], {self.result[0]},,,\n",
                  f"Drag Area [m2], {self.result[1]},,,\n,,,,\n",
                  f"Centre of Pressure, x, y, z,\n",
-                 f"Position [m], {self.cop[0]}, {self.cop[1]}, {self.cop[2]},\n\n"
+                 f"Position [m], {self.cop[0]}, {self.cop[1]}, {self.cop[2]},\n,,,\n"
                  f"Part, Drag [N], V/V_flow [-],\n"]
 
         for part in self.parts:

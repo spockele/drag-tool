@@ -5,7 +5,7 @@ Drag Area [m2], 0.161,,,
 ,,,,
 Centre of Pressure, x, y, z,
 Position [m], 0.35, 0.329, 0.0,
-
+,,,
 Part, Drag [N], V/V_flow [-],
 cabin, 6.494, 1,,
 rotor, 2.371, 1,,
