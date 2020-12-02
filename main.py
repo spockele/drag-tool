@@ -43,4 +43,5 @@ if __name__ == '__main__':
 
     else:
         runner = Case(case)
+        runner.run_case()
         runner.write_to_file()

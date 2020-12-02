@@ -35,8 +35,12 @@ class Case:
 
     def write_to_file(self, filename: str = None):
         lines = [f"Case, {self.name},\n",
-                 f"Drag, {self.result[0]},\n",
-                 f"Drag Area, {self.result[1]},"]
+                 f"Drag, {self.result[0]} N,\n",
+                 f"Drag Area, {self.result[1]} m2,\n\n"]
+
+        for part in self.parts:
+            lines.append(f"{part.__name__}, D = {round(part.drag, 3)}N ,"
+                         f" V/V_flow = {round(part.wake_factor, 3)},\n")
 
         path = f"data/result_{self.name}.csv" if filename is None else f"data/{filename}.csv"
         f = open(path, "w")
@@ -44,8 +48,7 @@ class Case:
         f.close()
 
     def plot_slowdown(self):
-        plt.plot(self.slowdown_xp, self.slowdown_fp, marker='o', markersize=5,
-                         linestyle='dashed')
+        plt.plot(self.slowdown_xp, self.slowdown_fp, marker='o', markersize=5, linestyle='dashed')
         plt.xlabel("$x/L_{char}$")
         plt.ylabel("$V/V_{flow}$")
         plt.ylim(0)
@@ -65,9 +68,10 @@ class Case:
         count = 5
         while line[0] != 'Cylinders':
             if "#" not in line[0]:
-                position = tuple(float(value) for value in line[0:3])
-                radius = float(line[3])
-                self.parts.append(Sphere(self.density, self.velocity, position, radius))
+                name = str(line[0])
+                position = tuple(float(value) for value in line[1:4])
+                radius = float(line[4])
+                self.parts.append(Sphere(self.density, self.velocity, position, radius, name=name))
 
             count += 1
             line = lines[count]
@@ -76,11 +80,13 @@ class Case:
         line = lines[count]
         while line[0] != 'Cuboids':
             if "#" not in line[0]:
-                position = tuple(float(value) for value in line[0:3])
-                radius, length = tuple(float(value) for value in line[3:5])
-                orientation = int(line[5])
+                name = str(line[0])
+                position = tuple(float(value) for value in line[1:4])
+                radius, length = tuple(float(value) for value in line[4:6])
+                orientation = int(line[6])
                 self.parts.append(
-                    Cylinder(self.density, self.velocity, position, radius, length, orientation))
+                    Cylinder(self.density, self.velocity, position, radius, length, orientation,
+                             name=name))
 
             count += 1
             line = lines[count]
@@ -89,9 +95,11 @@ class Case:
         line = lines[count]
         while line[0] != 'IceCream Cones':
             if "#" not in line[0]:
-                position = tuple(float(value) for value in line[0:3])
-                dimensions = tuple(float(value) for value in line[3:6])
-                self.parts.append(Cuboid(self.density, self.velocity, position, dimensions))
+                name = str(line[0])
+                position = tuple(float(value) for value in line[1:4])
+                dimensions = tuple(float(value) for value in line[4:7])
+                self.parts.append(Cuboid(self.density, self.velocity, position, dimensions,
+                                         name=name))
 
             count += 1
             line = lines[count]
@@ -100,12 +108,13 @@ class Case:
         line = lines[count]
         while line[0] != 'Disks':
             if "#" not in line[0]:
-                position = tuple(float(value) for value in line[0:3])
-                radius, length_cylinder, length_cone = tuple(float(value) for value in line[3:6])
-                orientation = int(line[6])
+                name = str(line[0])
+                position = tuple(float(value) for value in line[1:4])
+                radius, length_cylinder, length_cone = tuple(float(value) for value in line[4:7])
+                orientation = int(line[7])
                 self.parts.append(
                     IceCreamCone(self.density, self.velocity, position, radius, length_cylinder,
-                                 length_cone, orientation))
+                                 length_cone, orientation, name=name))
 
             count += 1
             line = lines[count]
@@ -114,11 +123,13 @@ class Case:
         line = lines[count]
         while line[0] != '':
             if "#" not in line[0]:
-                position = tuple(float(value) for value in line[0:3])
-                radius = float(line[3])
-                orientation = tuple(int(value) for value in line[4:6])
+                name = str(line[0])
+                position = tuple(float(value) for value in line[1:4])
+                radius = float(line[4])
+                orientation = tuple(int(value) for value in line[5:7])
 
-                self.parts.append(Disk(self.density, self.velocity, position, radius, orientation))
+                self.parts.append(Disk(self.density, self.velocity, position, radius,
+                                       orientation, name=name))
 
             count += 1
             line = lines[count]
@@ -142,6 +153,7 @@ class Case:
             other_part: Part
             for index_2, other_part in enumerate(self.parts[index_1+1:]):
                 other_surface = other_part.get_frontal_surface()
+
                 area = surface.intersection(other_surface)
 
                 if area != 0:

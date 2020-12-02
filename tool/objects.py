@@ -33,6 +33,8 @@ class Part:
         self._characteristic_length = None
         self.drag = None
 
+        self.__name__ = "Part"
+
     def set_slowdown(self, slowdown: float, area: float):
         self.slowdown = slowdown
         self.wake_slowdown = ((self.slowdown * area +
@@ -92,11 +94,14 @@ class Sphere(Part):
     """
     drag_coefficient = 0.15
 
-    def __init__(self, density: float, velocity: float, position: tuple, radius: float):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float,
+                 name="Sphere"):
         self.radius = radius
         wet_area = 4 * np.pi * self.radius ** 2
 
         super().__init__(density, velocity, position, wet_area)
+
+        self.__name__ = name
 
     def __repr__(self):
         return f"Sphere: [{self.position}, r={self.radius}]"
@@ -129,7 +134,7 @@ class Cylinder(Part):
     drag_coefficient = 0.4
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 length: float, orientation: int):
+                 length: float, orientation: int, name="Cylinder"):
         self.radius = radius
         self.length = length
         self.orientation = orientation
@@ -137,6 +142,8 @@ class Cylinder(Part):
         wet_area = 2 * np.pi * self.radius ** 2 + 2 * np.pi * self.radius * self.length
 
         super().__init__(density, velocity, position, wet_area)
+
+        self.__name__ = name
 
     def __repr__(self):
         return f"Cylinder: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
@@ -198,7 +205,8 @@ class Cuboid(Part):
     """
     drag_coefficient = 0.8
 
-    def __init__(self, density: float, velocity: float, position: tuple, dimensions: tuple):
+    def __init__(self, density: float, velocity: float, position: tuple, dimensions: tuple,
+                 name="Cuboid"):
         self.dimensions = dimensions
 
         wet_area = 2 * (self.dimensions[0] * self.dimensions[1] +
@@ -207,6 +215,8 @@ class Cuboid(Part):
                         )
 
         super().__init__(density, velocity, position, wet_area)
+
+        self.__name__ = name
 
     def __repr__(self):
         return f"Cuboid: [{self.position}, dims={self.dimensions}]"
@@ -238,7 +248,7 @@ class IceCreamCone(Part):
     drag_coefficient = 0.05
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 length_cylinder: float, length_cone: float, orientation: int):
+                 length_cylinder: float, length_cone: float, orientation: int, name="IceCreamCone"):
         self.radius = radius
         self.length_cylinder = length_cylinder
         self.length_cone = length_cone
@@ -249,6 +259,8 @@ class IceCreamCone(Part):
                     np.pi * self.radius * np.sqrt(self.length_cone ** 2 + self.radius ** 2))
 
         super().__init__(density, velocity, position, wet_area)
+
+        self.__name__ = name
 
     def __repr__(self):
         return f"IceCream cone: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
@@ -292,7 +304,7 @@ class Disk(Part):
     """
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 orientation: tuple):
+                 orientation: tuple, name="Disk"):
         self.radius = radius
         self.orientation = orientation
         self.wet_area = 2 * np.pi * self.radius ** 2
@@ -300,6 +312,8 @@ class Disk(Part):
         super().__init__(density, velocity, position, self.wet_area)
 
         self.friction_coefficient = 0.005
+
+        self.__name__ = name
 
     def __repr__(self):
         return f"Disk: [{self.position}, r={self.radius}, {self.orientation}]"
