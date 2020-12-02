@@ -4,7 +4,7 @@ Density, Velocity, Reynolds number, flow_direction,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-head, -0.430, -0.125, 0, 0.230
+head, -0.430, -0.125, 0, 0.115
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
 #

@@ -4,7 +4,7 @@ Density, Velocity, Reynolds number, flow_direction,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-head, 0.5725, 0.375, 0, 0.0975
+head, -0.5725, 0.375, 0, 0.0975
 #
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
@@ -25,10 +25,10 @@ right lower arm, -0.145, 0.160, 0.276, 0.065, 0.300, 0
 Cuboids,
 name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
 #
-left front arm, -0.650, 0.200, -0.5455, 0.200, 0.100, 0.759
-right front arm, -0.650, 0.200, 0.5455, 0.200, 0.100, 0.759
-left back arm, 0.650, 0.200, -0.5455, 0.200, 0.100, 0.759
-right back arm, 0.650, 0.200, 0.5455, 0.200, 0.100, 0.759
+left front arm, -0.650, 0.200, -0.5455, 0.200, 0.100, 0.684
+right front arm, -0.650, 0.200, 0.5455, 0.200, 0.100, 0.684
+left back arm, 0.650, 0.200, -0.5455, 0.200, 0.100, 0.684
+right back arm, 0.650, 0.200, 0.5455, 0.200, 0.100, 0.684
 #
 torso, -0.200, 0.375, 0, 0.550, 0.150, 0.422
 #
