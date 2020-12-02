@@ -20,6 +20,7 @@ class Part:
         self.slowdown = 1
         self.wake_slowdown = 1
         self.wake_factor = 1
+        self.largest_intersection = 0
 
         self.wet_area = wet_area
 
@@ -51,6 +52,10 @@ class Part:
         pressure_drag = self.wake_factor * (base_drag - friction_drag)
 
         self.drag = friction_drag + pressure_drag
+
+    def set_largest_intersection(self, area):
+        self.largest_intersection = area if area > self.largest_intersection \
+            else self.largest_intersection
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         raise NotImplementedError("Cannot execute for base class Part")

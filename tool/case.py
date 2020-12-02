@@ -20,8 +20,8 @@ class Case:
         self.reynolds_number = int()
         self.flow_direction = int()
 
-        self.slowdown_xp = [0, 3, 10, 100]
-        self.slowdown_fp = [0, .8, .9, 1]
+        self.slowdown_xp = (0, 3, 10, 100)
+        self.slowdown_fp = (0, .8, .9, 1)
 
         self.name = case
         self.load_case()
@@ -148,22 +148,26 @@ class Case:
 
         for index_1, part in enumerate(self.parts):
             surface = part.get_frontal_surface()
-            slowdown = part.wake_slowdown
 
             other_part: Part
             for index_2, other_part in enumerate(self.parts[index_1+1:]):
-                other_surface = other_part.get_frontal_surface()
+                slowdown = part.wake_slowdown
 
+                other_surface = other_part.get_frontal_surface()
                 area = surface.intersection(other_surface)
 
-                if area != 0:
-                    distance = other_part.position[self.flow_direction] - \
-                               part.position[self.flow_direction]
+                if area > other_part.largest_intersection:
+                    # print(part.__name__, other_part.__name__, area / other_surface.area)
+                    # print("\t", surface, other_surface)
+                    distance = (other_part.position[self.flow_direction] -
+                                part.position[self.flow_direction])
                     x = distance / part.get_characteristic_length()
 
                     slowdown *= round(np.interp(x, self.slowdown_xp, self.slowdown_fp), 4)
+                    # print("\t", distance, x, slowdown)
 
                     other_part.set_slowdown(slowdown, area)
+                    other_part.set_largest_intersection(area)
 
         total_drag = 0.
         for part in self.parts:
