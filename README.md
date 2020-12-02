@@ -1,7 +1,7 @@
 # Drag tool for Personal Air Transportation System
 [Original github repository](https://github.com/spockele/drag-tool)\
-Current version: 1.2\
-Branch with this version: version-1.2
+Current version: 1.3\
+Branch with this version: version-1.3
 
 ## Template case.csv file
 ```

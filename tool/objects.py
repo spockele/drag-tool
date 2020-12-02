@@ -4,7 +4,7 @@ Definition of all the object classes for the drag tool
 
 import numpy as np
 
-from .shapes import Rectangle, Circle
+from .shapes import ConeSideSurface, Rectangle, Circle
 
 
 class Part:
@@ -279,6 +279,19 @@ class IceCreamCone(Part):
             self._frontal_surface = Circle(round(self.position[axis_1], 3),
                                            round(self.position[axis_2], 3),
                                            self.radius)
+
+        elif self.orientation in (axis_1, axis_2):
+            area = (0.5 * np.pi * self.radius ** 2,
+                    2 * self.radius * self.length_cylinder,
+                    self.radius * self.length_cone)
+
+            x = (-4 * self.radius / (3 * np.pi),
+                 0.5 * self.length_cylinder,
+                 self.length_cylinder + self.length_cone / 3)
+
+            centroid = sum([a * x[i] for i, a in enumerate(area)]) / sum(area)
+
+            self._frontal_surface = ConeSideSurface(centroid, sum(area))
 
         else:
             raise ValueError(f"Frontal surface calculation in {axis_1}{axis_2} plane not "
