@@ -23,11 +23,25 @@ class Case:
         self.slowdown_xp = [0, 3, 10, 100]
         self.slowdown_fp = [0, .8, .9, 1]
 
-        self.load_case(case)
+        self.name = case
+        self.load_case()
+
+        self.result = tuple()
 
     def __repr__(self):
-        return f"Drag Analysis Case: [rho={self.density}, v={self.velocity} Re={self.reynolds_number}, " \
-               f"flow direction={self.flow_direction}] with parts: {self.parts}"
+        return f"Drag Analysis Case {self.name}: [rho={self.density}, v={self.velocity} " \
+               f"Re={self.reynolds_number}, flow direction={self.flow_direction}] " \
+               f"with parts: {self.parts}"
+
+    def write_to_file(self, filename: str = None):
+        lines = [f"Case, {self.name},\n",
+                 f"Drag, {self.result[0]},\n",
+                 f"Drag Area, {self.result[1]},"]
+
+        path = f"data/result_{self.name}.csv" if filename is None else f"data/{filename}.csv"
+        f = open(path, "w")
+        f.writelines(lines)
+        f.close()
 
     def plot_slowdown(self):
         plt.plot(self.slowdown_xp, self.slowdown_fp, marker='o', markersize=5,
@@ -39,8 +53,8 @@ class Case:
         plt.grid()
         plt.show()
 
-    def load_case(self, case: str):
-        f = open(f"data/{case}.csv")
+    def load_case(self):
+        f = open(f"data/{self.name}.csv")
         lines = [line.strip(",\n").split(", ") for line in f.readlines()]
         f.close()
 
@@ -146,4 +160,6 @@ class Case:
 
         drag_area = total_drag / (0.5 * self.density * self.velocity ** 2)
 
-        return self.velocity, total_drag, drag_area
+        self.result = round(total_drag, 3), round(drag_area, 3)
+
+        return self.velocity, self.result
