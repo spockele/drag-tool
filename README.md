@@ -4,6 +4,7 @@ Current version: 1.3\
 Branch with this version: version-1.3
 
 ## Template case.csv file
+The case file should use the following template. Put your values for your case in the appropriate place. Case files should be named: `[case_name].csv`.
 ```
 Case Definition,
 Density, Velocity, Reynolds number, flow_direction,
@@ -36,3 +37,6 @@ name, centre x, centre y, centre z, radius, orientation1, orientation2,
 ,
 
 ```
+
+## Results
+The program will output the results of a calculation in the `data/` folder as `result_[case_name].csv`. These csv files are recommended to be opened with a spreadsheet reader, as they are formatted for that purpose.
