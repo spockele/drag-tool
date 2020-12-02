@@ -1,0 +1,8 @@
+Case, icecream,
+Drag, 12.125 N,
+Drag Area, 0.161 m2,
+
+cabin, D = 6.494N , V/V_flow = 1,
+rotor, D = 2.371N , V/V_flow = 1,
+motor, D = 1.811N , V/V_flow = 1,
+shaft, D = 1.449N , V/V_flow = 1,

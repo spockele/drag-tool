@@ -1,38 +1,28 @@
-# Drag tool for Personal Air Transportation System
-[Original github repository](https://github.com/spockele/drag-tool)\
-Current version: 1.2\
-Branch with this version: version-1.2
-
-## Template case.csv file
-```
 Case Definition,
 Density, Velocity, Reynolds number, flow_direction,
-rho, V, Re, integer
+1.225, 11.1, 1500000, 0,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-[your values go here]
 #
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
 #
-[your values go here]
+shaft, 0.300, 1.000, 0, 0.040, 0.600, 1
+motor, 0.300, 1.400, 0, 0.150, 0.200, 1
 #
 Cuboids,
 name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
 #
-[your values go here]
 #
 IceCream Cones,
 name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
 #
-[your values go here]
+cabin, 0, 0, 0, 0.700, 0.600, 1.200, 0
 #
 Disks,
 name, centre x, centre y, centre z, radius, orientation1, orientation2,
 #
-[your values go here]
+rotor, 0.300, 1.545, 0, 1.000, 0, 2
 #
 ,
-
-```

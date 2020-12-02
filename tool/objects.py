@@ -20,6 +20,7 @@ class Part:
         self.slowdown = 1
         self.wake_slowdown = 1
         self.wake_factor = 1
+        self.largest_intersection = 0
 
         self.wet_area = wet_area
 
@@ -32,6 +33,8 @@ class Part:
         self._frontal_surface = None
         self._characteristic_length = None
         self.drag = None
+
+        self.__name__ = "Part"
 
     def set_slowdown(self, slowdown: float, area: float):
         self.slowdown = slowdown
@@ -49,6 +52,10 @@ class Part:
         pressure_drag = self.wake_factor * (base_drag - friction_drag)
 
         self.drag = friction_drag + pressure_drag
+
+    def set_largest_intersection(self, area):
+        self.largest_intersection = area if area > self.largest_intersection \
+            else self.largest_intersection
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         raise NotImplementedError("Cannot execute for base class Part")
@@ -92,14 +99,17 @@ class Sphere(Part):
     """
     drag_coefficient = 0.15
 
-    def __init__(self, density: float, velocity: float, position: tuple, radius: float):
+    def __init__(self, density: float, velocity: float, position: tuple, radius: float,
+                 name="Sphere"):
         self.radius = radius
         wet_area = 4 * np.pi * self.radius ** 2
 
         super().__init__(density, velocity, position, wet_area)
 
+        self.__name__ = name
+
     def __repr__(self):
-        return f"Sphere: [{self.position}, r={self.radius}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
@@ -108,7 +118,9 @@ class Sphere(Part):
         :param axis_2: Second axis defining the plane
         :return: None
         """
-        self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2], self.radius)
+        self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                       round(self.position[axis_2], 3),
+                                       self.radius)
 
     def set_smallest_coordinate(self, axis: int):
         self._smallest_coordinate = self.position[axis] - self.radius
@@ -129,7 +141,7 @@ class Cylinder(Part):
     drag_coefficient = 0.4
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 length: float, orientation: int):
+                 length: float, orientation: int, name="Cylinder"):
         self.radius = radius
         self.length = length
         self.orientation = orientation
@@ -138,8 +150,10 @@ class Cylinder(Part):
 
         super().__init__(density, velocity, position, wet_area)
 
+        self.__name__ = name
+
     def __repr__(self):
-        return f"Cylinder: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}, l={self.length}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         """
@@ -152,23 +166,24 @@ class Cylinder(Part):
                 The surface area)
         """
         if self.orientation == axis_1:
-            left = self.position[axis_1] - self.length / 2
-            top = self.position[axis_2] + self.radius
-            right = self.position[axis_1] + self.length / 2
-            bottom = self.position[axis_2] - self.radius
+            left = round(self.position[axis_1] - self.length / 2, 3)
+            top = round(self.position[axis_2] + self.radius, 3)
+            right = round(self.position[axis_1] + self.length / 2, 3)
+            bottom = round(self.position[axis_2] - self.radius, 3)
 
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         elif self.orientation == axis_2:
-            left = self.position[axis_1] - self.radius
-            top = self.position[axis_2] + self.length / 2
-            right = self.position[axis_1] + self.radius
-            bottom = self.position[axis_2] - self.length / 2
+            left = round(self.position[axis_1] - self.radius, 3)
+            top = round(self.position[axis_2] + self.length / 2, 3)
+            right = round(self.position[axis_1] + self.radius, 3)
+            bottom = round(self.position[axis_2] - self.length / 2, 3)
 
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         else:
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
 
     def set_smallest_coordinate(self, axis: int):
@@ -198,7 +213,8 @@ class Cuboid(Part):
     """
     drag_coefficient = 0.8
 
-    def __init__(self, density: float, velocity: float, position: tuple, dimensions: tuple):
+    def __init__(self, density: float, velocity: float, position: tuple, dimensions: tuple,
+                 name="Cuboid"):
         self.dimensions = dimensions
 
         wet_area = 2 * (self.dimensions[0] * self.dimensions[1] +
@@ -208,14 +224,16 @@ class Cuboid(Part):
 
         super().__init__(density, velocity, position, wet_area)
 
+        self.__name__ = name
+
     def __repr__(self):
-        return f"Cuboid: [{self.position}, dims={self.dimensions}]"
+        return f"{self.__name__}: [{self.position}, dims={self.dimensions}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
-        left = self.position[axis_1] - self.dimensions[axis_1] / 2
-        top = self.position[axis_2] + self.dimensions[axis_2] / 2
-        right = self.position[axis_1] + self.dimensions[axis_1] / 2
-        bottom = self.position[axis_2] - self.dimensions[axis_2] / 2
+        left = round(self.position[axis_1] - self.dimensions[axis_1] / 2, 3)
+        top = round(self.position[axis_2] + self.dimensions[axis_2] / 2, 3)
+        right = round(self.position[axis_1] + self.dimensions[axis_1] / 2, 3)
+        bottom = round(self.position[axis_2] - self.dimensions[axis_2] / 2, 3)
 
         self._frontal_surface = Rectangle(left, right, top, bottom)
 
@@ -238,7 +256,7 @@ class IceCreamCone(Part):
     drag_coefficient = 0.05
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 length_cylinder: float, length_cone: float, orientation: int):
+                 length_cylinder: float, length_cone: float, orientation: int, name="IceCreamCone"):
         self.radius = radius
         self.length_cylinder = length_cylinder
         self.length_cone = length_cone
@@ -250,13 +268,16 @@ class IceCreamCone(Part):
 
         super().__init__(density, velocity, position, wet_area)
 
+        self.__name__ = name
+
     def __repr__(self):
-        return f"IceCream cone: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
+        return f"{self.__name__}: [{self.position}, r={self.radius}, l_co={self.length_cylinder}, " \
                f"l_co={self.length_cone}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         if self.orientation not in (axis_1, axis_2):
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
 
         else:
@@ -292,7 +313,7 @@ class Disk(Part):
     """
 
     def __init__(self, density: float, velocity: float, position: tuple, radius: float,
-                 orientation: tuple):
+                 orientation: tuple, name="Disk"):
         self.radius = radius
         self.orientation = orientation
         self.wet_area = 2 * np.pi * self.radius ** 2
@@ -301,25 +322,28 @@ class Disk(Part):
 
         self.friction_coefficient = 0.005
 
+        self.__name__ = name
+
     def __repr__(self):
-        return f"Disk: [{self.position}, r={self.radius}, {self.orientation}]"
+        return f"{self.__name__}: [{self.position}, r={self.radius}, {self.orientation}]"
 
     def set_frontal_surface(self, axis_1: int, axis_2: int):
         if axis_1 in self.orientation and axis_2 in self.orientation:
-            self._frontal_surface = Circle(self.position[axis_1], self.position[axis_2],
+            self._frontal_surface = Circle(round(self.position[axis_1], 3),
+                                           round(self.position[axis_2], 3),
                                            self.radius)
         elif axis_1 in self.orientation:
-            left = self.position[axis_1] - self.radius
-            right = self.position[axis_1] + self.radius
-            top = self.position[axis_2] + 0.005
-            bottom = self.position[axis_2] - 0.005
+            left = round(self.position[axis_1] - self.radius, 3)
+            right = round(self.position[axis_1] + self.radius, 3)
+            top = round(self.position[axis_2] + 0.005, 3)
+            bottom = round(self.position[axis_2] - 0.005, 3)
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
         else:
-            left = self.position[axis_2] - 0.005
-            right = self.position[axis_2] + 0.005
-            top = self.position[axis_1] + self.radius
-            bottom = self.position[axis_1] - self.radius
+            left = round(self.position[axis_2] - 0.005, 3)
+            right = round(self.position[axis_2] + 0.005, 3)
+            top = round(self.position[axis_1] + self.radius, 3)
+            bottom = round(self.position[axis_1] - self.radius, 3)
             self._frontal_surface = Rectangle(left, right, top, bottom)
 
     def set_smallest_coordinate(self, axis: int):
