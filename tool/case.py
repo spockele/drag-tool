@@ -36,16 +36,16 @@ class Case:
                f"with parts: {self.parts}"
 
     def write_to_file(self, filename: str = None):
-        lines = [f"Case, {self.name},\n\n",
-                 f"Drag, {self.result[0]}, N,\n",
-                 f"Drag Area, {self.result[1]}, m2,\n\n",
+        lines = [f"Case, {self.name},,,\n\n",
+                 f"Drag [N], {self.result[0]},,,\n",
+                 f"Drag Area [m2], {self.result[1]},,,\n,,,,\n",
                  f"Centre of Pressure, x, y, z,\n",
                  f"Position [m], {self.cop[0]}, {self.cop[1]}, {self.cop[2]},\n\n"
                  f"Part, Drag [N], V/V_flow [-],\n"]
 
         for part in self.parts:
-            lines.append(f"{part.__name__}, {round(part.drag, 3)},"
-                         f" {round(part.wake_factor, 3)},\n")
+            lines.append(f"{part.__name__}, {round(part.drag, 3)}, "
+                         f"{round(part.wake_factor, 3)},,\n")
 
         path = f"data/result_{self.name}.csv" if filename is None else f"data/{filename}.csv"
         f = open(path, "w")
