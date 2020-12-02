@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 
 from .objects import Part, Sphere, Cylinder, Cuboid, IceCreamCone, Disk
+from .shapes import ConeSideSurface
 
 
 class Case:
@@ -27,6 +28,7 @@ class Case:
         self.load_case()
 
         self.result = tuple()
+        self.cop = tuple()
 
     def __repr__(self):
         return f"Drag Analysis Case {self.name}: [rho={self.density}, v={self.velocity} " \
@@ -34,13 +36,16 @@ class Case:
                f"with parts: {self.parts}"
 
     def write_to_file(self, filename: str = None):
-        lines = [f"Case, {self.name},\n",
-                 f"Drag, {self.result[0]} N,\n",
-                 f"Drag Area, {self.result[1]} m2,\n\n"]
+        lines = [f"Case, {self.name},\n\n",
+                 f"Drag, {self.result[0]}, N,\n",
+                 f"Drag Area, {self.result[1]}, m2,\n\n",
+                 f"Centre of Pressure, x, y, z,\n",
+                 f"Position [m], {self.cop[0]}, {self.cop[1]}, {self.cop[2]},\n\n"
+                 f"Part, Drag [N], V/V_flow [-],\n"]
 
         for part in self.parts:
-            lines.append(f"{part.__name__}, D = {round(part.drag, 3)}N ,"
-                         f" V/V_flow = {round(part.wake_factor, 3)},\n")
+            lines.append(f"{part.__name__}, {round(part.drag, 3)},"
+                         f" {round(part.wake_factor, 3)},\n")
 
         path = f"data/result_{self.name}.csv" if filename is None else f"data/{filename}.csv"
         f = open(path, "w")
@@ -135,8 +140,8 @@ class Case:
             line = lines[count]
 
     def run_case(self):
-        perpendicular_plane = [0, 2, 1]
-        perpendicular_plane.remove(self.flow_direction)
+        perpendicular_plane = [2, 1]
+        self.flow_direction = 0
 
         part: Part
         for part in self.parts:
@@ -170,9 +175,32 @@ class Case:
                     other_part.set_largest_intersection(area)
 
         total_drag = 0.
+        total_area = 0.
+
+        total_moment_z = 0.
+        total_moment_y = 0.
+        total_moment_x = 0.
+
         for part in self.parts:
             part.apply_slowdown(self.flow_direction)
             total_drag += part.drag
+
+            if 'rotor' not in part.__name__:
+                total_moment_z += part.drag * part.z_centre
+                total_moment_y += part.drag * part.y_centre
+
+                part.set_frontal_surface(0, 1)
+                surface = part.get_frontal_surface()
+                total_area += surface.area
+
+                if isinstance(surface, ConeSideSurface):
+                    total_moment_x += surface.geometric_centre * surface.area
+                else:
+                    total_moment_x += part.get_frontal_surface().area * part.x_centre
+
+        self.cop = (round(total_moment_x / total_area, 3),
+                    round(total_moment_y / total_drag, 3),
+                    round(total_moment_z / total_drag, 3))
 
         drag_area = total_drag / (0.5 * self.density * self.velocity ** 2)
 

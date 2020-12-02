@@ -5,6 +5,19 @@
 import numpy as np
 
 
+class ConeSideSurface:
+    """
+
+    """
+
+    def __init__(self, geometric_centre, area):
+        self.geometric_centre = geometric_centre
+        self.area = area
+
+    def intersection(self, other):
+        raise NotImplementedError(f"The intersection with a general surface cannot be calculated.")
+
+
 class Rectangle:
     """
 
