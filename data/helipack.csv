@@ -4,31 +4,33 @@ Density, Velocity, Reynolds number, flow_direction,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-head, -0.170, 0.3725, 0, 0.0975
+head, -0.393, 0.3725, 0, 0.0975
 #
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
 #
-long shaft, 0, 0.750, 0, 0.040, 0.900, 1
-motor, 0, 1.250, 0, 0.150, 0.100, 1
+long shaft, -0.112, 0.030, 0, 0.0267, 0.970, 1
+motor, -0.112, 0.585, 0, 0.210, 0.140, 1
 #
-left upper arm, -0.170, 0.110, -0.276, 0.065, 0.330, 1
-left lower arm, -0.235, -0.055, -0.276, 0.065, 0.300, 0
+left upper arm, -0.393, 0.110, -0.276, 0.065, 0.330, 1
+left lower arm, -0.458, -0.055, -0.276, 0.065, 0.300, 0
 #
-right upper arm, -0.170, 0.110, 0.276, 0.065, 0.330, 1
-right lower arm, -0.235, -0.055, 0.276, 0.065, 0.300, 0
+right upper arm, -0.393, 0.110, 0.276, 0.065, 0.330, 1
+right lower arm, -0.458, -0.055, 0.276, 0.065, 0.300, 0
 #
-left upper leg, -0.470, -0.275, -0.111, 0.100, 0.450, 0
-left lower leg, -0.695, -0.515, -0.111, 0.055, 0.480, 1
+left upper leg, -0.693, -0.275, -0.111, 0.100, 0.450, 0
+left lower leg, -0.918, -0.515, -0.111, 0.055, 0.480, 1
 #
-right upper leg, -0.470, -0.275, 0.111, 0.100, 0.450, 0
-right lower leg, -0.695, -0.515, 0.111, 0.055, 0.480, 1
+right upper leg, -0.693, -0.275, 0.111, 0.100, 0.450, 0
+right lower leg, -0.918, -0.515, 0.111, 0.055, 0.480, 1
 #
 Cuboids,
 name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
 #
-backpack, 0, 0, 0, 0.190, 0.600, 0.300
-torso, -0.170, 0, 0, 0.150, 0.550, 0.422
+battery, 0, 0, 0, 0.190, 0.910, 0.400
+auxiliary, -0.181, -0.2425, 0, 0.084, 0.425, 0.310
+luggage, -0.112, -0.655, 0, 0.600, 0.300, 0.500
+torso, -0.393, 0, 0, 0.150, 0.550, 0.422
 #
 IceCream Cones,
 name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
@@ -36,5 +38,5 @@ name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orient
 Disks,
 name, centre x, centre y, centre z, radius, orientation1, orientation2,
 #
-rotor, 0, 1.345, 0, 1.000, 0, 2
+rotor, -0.112, 0.755, 0, 1.250, 0, 2
 ,
