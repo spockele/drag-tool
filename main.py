@@ -54,7 +54,7 @@ if __name__ == '__main__':
         drag_percent_error2s = []
 
         for index, validation_case in enumerate(validation_cases):
-            runner = Case(validation_case)
+            runner = Case("validation/" + validation_case)
             velocity, result = runner.run_case()
 
             velocities.append(velocity)
