@@ -1,7 +1,7 @@
 # Drag tool for Personal Air Transportation System
 [Original github repository](https://github.com/spockele/drag-tool)\
 Current version: 1.3.1\
-Branch with this version: main (commit [main 903fac4])
+Branch with this version: main (commit [main fb059c2](https://github.com/spockele/drag-tool/commit/fb059c2842d0f4ef4f0c5fc00c5116d6196b2906))
 
 ## Template case.csv file
 The case file should use the following template. Put your values for your case in the appropriate place. Case files should be named: `[case_name].csv`.
