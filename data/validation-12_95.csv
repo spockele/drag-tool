@@ -4,7 +4,8 @@ Density, Velocity, Reynolds number, flow_direction,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-head, -0.430, -0.125, 0, 0.230
+head, -0.430, -0.125, 0, 0.115
+#
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
 #
@@ -25,16 +26,20 @@ bike frame 2, 0.5025, -1.060, 0, 0.025, 0.405, 0
 bike frame 3, 0, -0.521, 0, 0.025, 0.601, 0
 bike frame 4, -0.300, -0.7555, 0, 0.025, 0.609, 1
 bike frame 5, -0.300, -0.451, 0, 0.025, 0.400, 2
+#
 Cuboids,
 name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
 #
 torso, 0, 0, 0, 0.6, 0.25, 0.38
+#
 IceCream Cones,
 name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
+#
 #
 Disks,
 name, centre x, centre y, centre z, radius, orientation1, orientation2,
 #
 front wheel, -0.300, -1.060, 0, 0.700, 0, 1
 back wheel, 0.705, -1.060, 0, 0.700, 0, 1
+#
 ,

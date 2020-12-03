@@ -1,29 +1,24 @@
 Case Definition,
 Density, Velocity, Reynolds number, flow_direction,
-rho, V, Re, integer
+0, 0, 0, 0,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
-[your values go here]
 #
 Cylinders,
 name, centre x, centre y, centre z, radius, length, orientation,
 #
-[your values go here]
 #
 Cuboids,
 name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
 #
-[your values go here]
 #
 IceCream Cones,
 name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
 #
-[your values go here]
 #
 Disks,
 name, centre x, centre y, centre z, radius, orientation1, orientation2,
 #
-[your values go here]
 #
 ,
