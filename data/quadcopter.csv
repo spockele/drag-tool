@@ -39,8 +39,8 @@ name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orient
 Disks,
 name, centre x, centre y, centre z, radius, orientation1, orientation2,
 #
-left front rotor, -0.650, 0, -1.000, 0.625, 0, 2
-left back rotor, 0.650, 0, -1.000, 0.625, 0, 2
-right front rotor, -0.650, 0, 1.000, 0.625, 0, 2
-right back rotor, 0.650, 0, 1.000, 0.625, 0, 2
+left front rotor, -0.650, 0, -1.000, 0.700, 0, 2
+left back rotor, 0.650, 0, -1.000, 0.700, 0, 2
+right front rotor, -0.650, 0, 1.000, 0.700, 0, 2
+right back rotor, 0.650, 0, 1.000, 0.700, 0, 2
 ,
