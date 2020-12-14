@@ -108,7 +108,7 @@ if __name__ == '__main__':
         Case('template_case').plot_slowdown()
 
     elif case == 'all' or case == 'a':
-        for case in ('quadcopter', 'helipack', 'icecream'):
+        for case in ('all_concepts/quadcopter', 'all_concepts/helipack', 'all_concepts/icecream'):
             runner = Case(case)
             runner.run_case()
             runner.write_to_file()
