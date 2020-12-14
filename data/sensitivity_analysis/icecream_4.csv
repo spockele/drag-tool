@@ -1,0 +1,28 @@
+Case Definition,
+Density, Velocity, Reynolds number, flow_direction,
+1.225, 11.1, 1500000, 0,
+Spheres,
+name, centre x, centre y, centre z, radius,
+#
+#
+Cylinders,
+name, centre x, centre y, centre z, radius, length, orientation,
+#
+shaft, 0.300, 0.730, 0, 0.0267, 0.060, 1
+motor, 0.300, 1.370, 0, 0.205, 0.140, 1
+#
+Cuboids,
+name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
+#
+#
+IceCream Cones,
+name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
+#
+cabin, 0, 0, 0, 1.300, 0.600, 1.200, 0
+#
+Disks,
+name, centre x, centre y, centre z, radius, orientation1, orientation2,
+#
+rotor, 0.300, 1.490, 0, 1.250, 0, 2
+#
+,

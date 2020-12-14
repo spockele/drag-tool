@@ -26,7 +26,7 @@ class Rectangle:
     def __init__(self, left, right, top, bottom):
         self.left, self.right, self.top, self.bottom = left, right, top, bottom
 
-        self.area = round((self.right - self.left) * (self.top - self.bottom), 3)
+        self.area = (self.right - self.left) * (self.top - self.bottom)
 
         self.lines = (Line(self.left, self.top, self.right, self.top),
                       Line(self.left, self.bottom, self.right, self.bottom),
@@ -60,7 +60,7 @@ class Circle:
     def __init__(self, x_centre, y_centre, radius):
         self.x_centre, self.y_centre, self.radius = x_centre, y_centre, radius
 
-        self.area = round(np.pi * self.radius ** 2, 3)
+        self.area = np.pi * self.radius ** 2
 
     def __repr__(self):
         return f"Circle: [{(self.x_centre, self.y_centre)}, r={self.radius}]"
@@ -90,7 +90,7 @@ class Circle:
         return self.y_centre - self.radius < y < self.y_centre + self.radius
 
     def on_circle(self, x, y):
-        return line_length(self.x_centre, self.y_centre, x, y) <= self.radius
+        return round(line_length(self.x_centre, self.y_centre, x, y), 2) == round(self.radius, 2)
 
     def intersection(self, other):
         if isinstance(other, Rectangle):
@@ -127,7 +127,7 @@ def sign(x):
 
 
 def line_length(x1, y1, x2, y2):
-    return round(np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2), 3)
+    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
 def intersection_line_circle(line: Line, circle: Circle):
@@ -156,8 +156,8 @@ def intersection_line_circle(line: Line, circle: Circle):
             y1_int = line.slope * (x1_int - x1) + y1
             y2_int = line.slope * (x2_int - x1) + y1
 
-            return (round(x1_int + circle.x_centre, 3), round(y1_int + circle.y_centre, 3),
-                    round(x2_int + circle.x_centre, 3), round(y2_int + circle.y_centre, 3))
+            return (x1_int + circle.x_centre, y1_int + circle.y_centre,
+                    x2_int + circle.x_centre, y2_int + circle.y_centre)
 
 
 def area_circular_segment(intersection, circle: Circle):
@@ -165,12 +165,12 @@ def area_circular_segment(intersection, circle: Circle):
     r = np.sqrt(circle.radius ** 2 - 0.25 * a ** 2)
     theta = 2 * np.arcsin(0.5 * a / circle.radius)
 
-    return round(circle.area * theta / (2 * np.pi) - 0.5 * r * a, 3)
+    return circle.area * theta / (2 * np.pi) - 0.5 * r * a
 
 
 def area_triangle(a, b, c):
     s = (a + b + c) / 2
-    return round(np.sqrt(s * (s - a) * (s - b) * (s - c)), 3)
+    return np.sqrt(s * (s - a) * (s - b) * (s - c))
 
 
 def find_inside_vertices(circle, rectangle):
@@ -224,7 +224,7 @@ def find_double_intersections(intersection):
     intersects = []
     result = []
     for index, _ in enumerate(intersection[::2]):
-        intersect = round(intersection[2 * index], 3), round(intersection[2 * index + 1], 3)
+        intersect = intersection[2 * index], intersection[2 * index + 1]
         if intersect not in intersects:
             intersects.append(intersect)
             result += [*intersect]
@@ -348,9 +348,9 @@ def intersection_circle_circle(circle1: Circle, circle2: Circle):
             area = circle_no_intersection(circle1, circle2)
 
     else:
-        p = (1 / (2 * y1) * (x1 ** 2 + y1 ** 2 - circle1.radius ** 2 + circle2.radius ** 2))
+        p = (1 / (2 * y1)) * (x1 ** 2 + y1 ** 2 - circle1.radius ** 2 + circle2.radius ** 2)
 
-        a = 2
+        a = 1 + (x1 / y1) ** 2
         b = -2 * p * (x1 / y1)
         c = p ** 2 - circle2.radius ** 2
 
@@ -361,10 +361,12 @@ def intersection_circle_circle(circle1: Circle, circle2: Circle):
 
         else:
             x1_int = (-b + np.sqrt(discriminant)) / (2 * a)
-            y1_int = - (circle1.x_centre / circle1.y_centre) * x1_int + p
+            y1_int = - (x1 / y1) * x1_int + p + circle2.y_centre
+            x1_int += circle2.x_centre
 
             x2_int = (-b - np.sqrt(discriminant)) / (2 * a)
-            y2_int = - (circle1.x_centre / circle1.y_centre) * x2_int + p
+            y2_int = - (x1 / y1) * x2_int + p + circle2.y_centre
+            x2_int += circle2.x_centre
 
             if (circle1.on_circle(x1_int, y1_int) and circle2.on_circle(x1_int, y1_int) and
                     circle1.on_circle(x2_int, y2_int) and circle2.on_circle(x2_int, y2_int)):

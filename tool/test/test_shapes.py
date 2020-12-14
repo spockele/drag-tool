@@ -18,6 +18,7 @@ class TestIntersectionLineCircle(unittest.TestCase):
         circle = shapes.Circle(1, 1, 1)
 
         intersection = shapes.intersection_line_circle(line, circle)
+        intersection = tuple(round(intersect, 3) for intersect in intersection)
         expected_intersection = (round(1 + np.cos(np.pi / 4), 3), round(1 - np.sin(np.pi / 4), 3),
                                  round(1 - np.cos(np.pi / 4), 3), round(1 + np.sin(np.pi / 4), 3)
                                  )
@@ -56,7 +57,7 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
         expected_area = circle.area / 2
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_no_vertex_double_intersection(self):
         rectangle = shapes.Rectangle(-1, 1, 4, -4)
@@ -65,11 +66,11 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
         expected_area = 4 * np.sqrt(3) + 2 * (circle.area * 1.047 / (2 * np.pi) - np.sqrt(3))
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
         rectangle = shapes.Rectangle(-4, 4, 1, -1)
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_no_vertex_triple_intersection(self):
         rectangle = shapes.Rectangle(-3, 1.8, 1.8, -1.8)
@@ -78,7 +79,7 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
         expected_area = circle.area - 3 * (0.1436 * circle.area - 1.744 * 1.8 / 2)
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_no_vertex_four_intersection(self):
         rectangle = shapes.Rectangle(-1.8, 1.8, 1.8, -1.8)
@@ -87,21 +88,21 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
         expected_area = circle.area - 4 * (0.1436 * circle.area - 1.744 * 1.8 / 2)
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_no_vertex_circle_inside(self):
         rectangle = shapes.Rectangle(-2, 2, 2, -2)
         circle = shapes.Circle(0, 0, 1)
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(circle.area, 2))
+                         round(circle.area, 3))
 
     def test_one_inside_vertex(self):
         rectangle = shapes.Rectangle(0, 2, 2, 0)
         circle = shapes.Circle(0, 0, 1)
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(0.25 * circle.area - 0.01, 2))
+                         round(0.25 * circle.area - 0.01, 3))
 
     def test_two_inside_vertex(self):
         rectangle = shapes.Rectangle(0, 3, 1, 0)
@@ -113,7 +114,7 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
                         shapes.intersection_rectangle_circle(helper_rectangle2, circle))
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_three_inside_vertex(self):
         rectangle = shapes.Rectangle(0, 1.8, 1.8, 0)
@@ -122,14 +123,14 @@ class TestIntersectionRectangleCircle(unittest.TestCase):
         expected_area = rectangle.area - 0.431 + 0.1064 * circle.area - 1.2397
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(expected_area, 2))
+                         round(expected_area, 3))
 
     def test_four_inside_vertex(self):
         rectangle = shapes.Rectangle(-1, 1, 1, -1)
         circle = shapes.Circle(0, 0, 2)
 
         self.assertEqual(shapes.intersection_rectangle_circle(rectangle, circle),
-                         round(rectangle.area, 2))
+                         round(rectangle.area, 3))
 
 
 class TestIntersectionCircleCircle(unittest.TestCase):
@@ -159,7 +160,7 @@ class TestIntersectionCircleCircle(unittest.TestCase):
         circle1 = shapes.Circle(1, 1, 1)
         circle2 = shapes.Circle(1, 0, 1)
 
-        intersection = (0.5, 0.13397, 0.5, 1.86603)
+        intersection = (0.13397, 0.5, 1.86603, 0.5)
         expected_area = (shapes.area_circular_segment(intersection, circle1) +
                          shapes.area_circular_segment(intersection, circle2))
 
@@ -228,30 +229,33 @@ class TestAreaCircularSegment(unittest.TestCase):
         circle = shapes.Circle(0, 0, 1)
         intersection = (-1, 0, 1, 0)
 
-        expected_area = round(0.5 * circle.area, 3)
+        expected_area = 0.5 * circle.area
 
-        self.assertEqual(shapes.area_circular_segment(intersection, circle), expected_area)
+        self.assertEqual(round(shapes.area_circular_segment(intersection, circle), 3),
+                         round(expected_area, 3))
 
     def test_quarter_area(self):
         circle = shapes.Circle(0, 0, 1)
         intersection = (-np.cos(np.pi / 4), np.sin(np.pi / 4), np.cos(np.pi / 4), np.sin(np.pi / 4))
 
-        expected_area = round(0.25 * circle.area - 0.5 * np.sin(np.pi / 4) * 2 * np.cos(np.pi / 4),
-                              3)
+        expected_area = 0.25 * circle.area - 0.5 * np.sin(np.pi / 4) * 2 * np.cos(np.pi / 4)
 
-        self.assertEqual(shapes.area_circular_segment(intersection, circle), expected_area)
+        self.assertEqual(round(shapes.area_circular_segment(intersection, circle), 3),
+                         round(expected_area, 3))
 
 
 class TestAreaTriangle(unittest.TestCase):
     def test_equilateral(self):
         sides = 1, 1, 1
 
-        self.assertEqual(shapes.area_triangle(*sides), round(0.25 * np.sqrt(3), 3))
+        self.assertEqual(round(shapes.area_triangle(*sides), 3),
+                         round(0.25 * np.sqrt(3), 3))
 
     def test_isosceles(self):
         sides = 1, 2, 2
 
-        self.assertEqual(shapes.area_triangle(*sides), round(0.25 * np.sqrt(15), 3))
+        self.assertEqual(round(shapes.area_triangle(*sides), 3),
+                         round(0.25 * np.sqrt(15), 3))
 
     def test_other(self):
         sides = 3, 4, 5

@@ -6,39 +6,56 @@ validation_cases = ('validation-12_95', 'validation-13_34', 'validation-13_71',
                     'validation-14_33', 'validation-14_78')
 validation_results = (23.75, 25.5, 27.25, 29.25, 30.75)
 
+sensitivity_dimensions = {'quadcopter': (.1, .2, .3, .4, .5),
+                          'helipack': (.4, .5, .6, .7, .8),
+                          'icecream': (.5, .7, .9, 1.1, 1.3)
+                          }
+scaled_dimensions = {'quadcopter': 'Body Radius',
+                     'helipack': 'Battery Width',
+                     'icecream': 'Cabin Radius'
+                     }
+
 
 def validation_plotter(velocities, results, percent_errors, percent_errors2):
+    plt.subplots(figsize=(8, 3), dpi=150)
     # Results vs validation data
-    ax1 = plt.subplot(221)
-    ax1.plot(velocities, results, marker="o", label="Tool output")
-    ax1.plot(velocities, validation_results, marker="^", label="Validation data")
-    ax1.set_ylabel("D [N]")
-    plt.setp(ax1.get_xticklabels(), visible=False)
+    ax1 = plt.subplot(121)
+
+    ax1.plot(results, velocities, marker="o", label="Tool output")
+    ax1.plot(validation_results, velocities, marker="^", label="Validation data")
+
+    y = list(0.142 * velocity ** 2 for velocity in velocities)
+    ax1.plot(y, velocities, marker="v", label="Validation fit curve")
+
+    ax1.set_xlabel("D [N]")
+    ax1.set_ylabel("$V_{flow} [m/s]$")
     ax1.legend()
 
-    # Results vs validation fit curve
-    ax2 = plt.subplot(222, sharey=ax1)
-    y = list(0.142 * velocity ** 2 for velocity in velocities)
-    ax2.plot(velocities, results, marker="o", label="Tool output")
-    ax2.plot(velocities, y, marker="^", label="Validation fit curve")
-    plt.setp(ax2.get_xticklabels(), visible=False)
-    plt.setp(ax2.get_yticklabels(), visible=False)
-    ax2.legend()
-
     # Errors vs validation data
-    ax3 = plt.subplot(223)
-    ax3.plot(velocities, percent_errors, marker="v", label="$\Delta$ from data", color="red")
-    ax3.set_xlabel("$V_{flow} [m/s]$")
-    ax3.set_ylabel("$\Delta D [\%]$")
+    ax3 = plt.subplot(122, sharey=ax1)
+    ax3.plot(min(percent_errors), min(velocities), marker=None, color=None)
+
+    ax3.plot(percent_errors, velocities, marker="^", label="$\Delta$ from data")
+    ax3.plot(percent_errors2, velocities, marker="v", label="$\Delta$ from fit curve")
+
+    plt.setp(ax3.get_yticklabels(), visible=False)
+    ax3.set_xlabel("$\Delta D [\%]$")
     ax3.legend()
 
-    ax4 = plt.subplot(224, sharey=ax3)
-    ax4.plot(velocities, percent_errors2, marker="v", label="$\Delta$ from fit curve", color="red")
-    ax4.set_xlabel("$V_{flow} [m/s]$")
-    plt.setp(ax4.get_yticklabels(), visible=False)
-    ax4.legend()
+    plt.subplots_adjust(left=.09, bottom=.15, right=.99, top=.99, wspace=.02, hspace=.2)
+    plt.show()
 
-    plt.subplots_adjust(left=.085, bottom=.1, right=.986, top=.986, wspace=.04, hspace=.04)
+
+def sensitivity_plotter(results):
+    plt.subplots(figsize=(8, 3), dpi=180)
+    for index, concept in enumerate(('quadcopter', 'helipack', 'icecream')):
+        ax = plt.subplot(1, 3, index + 1)
+        ax.plot(sensitivity_dimensions[concept], results[concept], marker='o')
+        ax.set_xlabel(f'{scaled_dimensions[concept]} $[m]$')
+        if not index:
+            plt.ylabel('$S_{ref}\ C_D [m^2]$')
+
+    plt.subplots_adjust(left=.075, bottom=.155, right=.99, top=.99, wspace=.3, hspace=.2)
     plt.show()
 
 
@@ -87,7 +104,7 @@ if __name__ == '__main__':
 
         validation_plotter(velocities, results, drag_percent_errors, drag_percent_error2s)
 
-    elif case == 'slowdown' or case == 's':
+    elif case == 'slowdown':
         Case('template_case').plot_slowdown()
 
     elif case == 'all' or case == 'a':
@@ -95,6 +112,20 @@ if __name__ == '__main__':
             runner = Case(case)
             runner.run_case()
             runner.write_to_file()
+
+    elif case == 'sensitivity' or case == 's':
+        results = {}
+        for name in ('quadcopter', 'helipack', 'icecream'):
+            results[name] = []
+
+            for index in range(5):
+                runner = Case(f'sensitivity_analysis/{name}_{index}')
+                velocity, result = runner.run_case()
+                runner.write_to_file()
+
+                results[name].append(result[1])
+
+        sensitivity_plotter(results)
 
     elif case == 'q':
         exit()
