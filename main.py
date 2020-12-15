@@ -131,6 +131,7 @@ if __name__ == '__main__':
         exit()
 
     else:
+        results = []
         for direction in (0, 1, 2):
             drag_area = []
             cop = []
@@ -149,4 +150,15 @@ if __name__ == '__main__':
                          round(sum(c[2] for c in cop) / len(cop), 3)
                          )
 
-            print(drag_area_final, cop_final)
+            results.append((drag_area_final, cop_final))
+
+        print(results)
+
+        lines = [f'Flow direction, Drag Area [m2], CoP (x) [m], CoP (y) [m], CoP (z) [m],\n',
+                 f'x, {results[0][0]}, {results[0][1][0]}, {results[0][1][1]}, {results[0][1][2]},\n',
+                 f'y, {results[1][0]}, {results[1][1][0]}, {results[1][1][1]}, {results[1][1][2]},\n',
+                 f'z, {results[2][0]}, {results[2][1][0]}, {results[2][1][1]}, {results[2][1][2]},\n']
+
+        f = open('data/result_quadcopter.csv', 'w')
+        f.writelines(lines)
+        f.close()
