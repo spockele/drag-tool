@@ -1,5 +1,6 @@
 if __name__ == '__main__':
-    f = open('data/stability_and_control_sample_input.csv')
+    index = int(input('Enter the index of the input file: '))
+    f = open(f'data/s_and_c-input_{index}.csv')
     lines = [line.strip(",\n").split(", ") for line in f.readlines()]
     f.close()
 
