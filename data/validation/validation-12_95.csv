@@ -1,6 +1,6 @@
 Case Definition,
-Density, Velocity, Reynolds number, flow_direction,
-1.225, 12.95, 700000, 0,
+Density, Velocity, flow_direction,
+1.225, 12.95, 0,
 Spheres,
 name, centre x, centre y, centre z, radius,
 #
