@@ -1,0 +1,46 @@
+Case Definition,
+Density, Velocity, flow_direction,
+1.225, 2.5, 1,
+Spheres,
+name, centre x, centre y, centre z, radius,
+#
+head, -0.5725, 0.375, 0, 0.0975
+#
+Cylinders,
+name, centre x, centre y, centre z, radius, length, orientation,
+#
+main body, 0, 0, 0, 0.300, 1.500, 0
+#
+left front motor, -0.650, 0.140, -1.000, 0.150, 0.180, 1
+right front motor, -0.650, 0.140, 1.000, 0.150, 0.180, 1
+left back motor, 0.650, 0.140, -1.000, 0.150, 0.180, 1
+right back motor, 0.650, 0.140, 1.000, 0.150, 0.180, 1
+#
+left upper arm, -0.310, 0.375, -0.276, 0.065, 0.330, 0
+left lower arm, -0.145, 0.160, -0.276, 0.065, 0.300, 0
+#
+right upper arm, -0.310, 0.375, 0.276, 0.065, 0.330, 0
+right lower arm, -0.145, 0.160, 0.276, 0.065, 0.300, 0
+#
+Cuboids,
+name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
+#
+left front arm, -0.650, 0.200, -0.5455, 0.200, 0.100, 0.684
+right front arm, -0.650, 0.200, 0.5455, 0.200, 0.100, 0.684
+left back arm, 0.650, 0.200, -0.5455, 0.200, 0.100, 0.684
+right back arm, 0.650, 0.200, 0.5455, 0.200, 0.100, 0.684
+#
+torso, -0.200, 0.375, 0, 0.550, 0.150, 0.422
+#
+IceCream Cones,
+name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
+#
+#
+Disks,
+name, centre x, centre y, centre z, radius, orientation1, orientation2,
+#
+left front rotor, -0.650, 0, -1.000, 0.700, 0, 2
+left back rotor, 0.650, 0, -1.000, 0.700, 0, 2
+right front rotor, -0.650, 0, 1.000, 0.700, 0, 2
+right back rotor, 0.650, 0, 1.000, 0.700, 0, 2
+,
