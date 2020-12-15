@@ -107,30 +107,32 @@ if __name__ == '__main__':
     elif case == 'slowdown':
         Case('template_case').plot_slowdown()
 
-    elif case == 'all' or case == 'a':
-        for case in ('all_concepts/quadcopter', 'all_concepts/helipack', 'all_concepts/icecream'):
-            runner = Case(case)
-            runner.run_case()
-            runner.write_to_file()
-
-    elif case == 'sensitivity' or case == 's':
-        results = {}
-        for name in ('quadcopter', 'helipack', 'icecream'):
-            results[name] = []
-
-            for index in range(5):
-                runner = Case(f'sensitivity_analysis/{name}_{index}')
-                velocity, result = runner.run_case()
-                runner.write_to_file()
-
-                results[name].append(result[1])
-
-        sensitivity_plotter(results)
+    # elif case == 'all' or case == 'a':
+    #     for case in ('all_concepts/quadcopter', 'all_concepts/helipack', 'all_concepts/icecream'):
+    #         runner = Case(case)
+    #         runner.run_case()
+    #         runner.write_to_file()
+    #
+    # elif case == 'sensitivity' or case == 's':
+    #     results = {}
+    #     for name in ('quadcopter', 'helipack', 'icecream'):
+    #         results[name] = []
+    #
+    #         for index in range(5):
+    #             runner = Case(f'sensitivity_analysis/{name}_{index}')
+    #             velocity, result = runner.run_case()
+    #             runner.write_to_file()
+    #
+    #             results[name].append(result[1])
+    #
+    #     sensitivity_plotter(results)
 
     elif case == 'q':
         exit()
 
     else:
-        runner = Case(case)
-        runner.run_case()
-        runner.write_to_file()
+        for direction in (0, 1, 2):
+            geometry = None if direction == 1 else 'quadcopter_geometry'
+            case = Case(f'quadcopter_{direction}', geometry=geometry)
+            data = case.run_case()
+            case.write_to_file()

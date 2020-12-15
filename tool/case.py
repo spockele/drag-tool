@@ -14,7 +14,7 @@ class Case:
     """
 
     """
-    def __init__(self, case: str):
+    def __init__(self, case: str, geometry: str = None):
         self.parts = list()
         self.density = float()
         self.velocity = float()
@@ -24,6 +24,7 @@ class Case:
         self.slowdown_xp = (0, 2, 10, 100)
         self.slowdown_fp = (0, .85, .95, 1)
 
+        self.geometry = geometry
         self.name = case
         self.load_case()
 
@@ -67,7 +68,12 @@ class Case:
         f.close()
 
         self.density, self.velocity = (float(value) for value in lines[2][0:2])
-        self.reynolds_number, self.flow_direction = (int(value) for value in lines[2][2:4])
+        self.flow_direction = int(lines[2][2])
+
+        if self.geometry is not None:
+            f = open(f"data/{self.geometry}.csv")
+            lines = [line.strip(",\n").split(", ") for line in f.readlines()]
+            f.close()
 
         line = lines[5]
         count = 5
@@ -140,8 +146,8 @@ class Case:
             line = lines[count]
 
     def run_case(self):
-        perpendicular_plane = [2, 1]
-        self.flow_direction = 0
+        perpendicular_plane = [0, 2, 1]
+        perpendicular_plane.remove(self.flow_direction)
 
         part: Part
         for part in self.parts:
@@ -159,7 +165,10 @@ class Case:
                 slowdown = part.wake_slowdown
 
                 other_surface = other_part.get_frontal_surface()
-                area = surface.intersection(other_surface)
+                try:
+                    area = surface.intersection(other_surface)
+                except TypeError:
+                    raise Exception(f'{part.__name__, other_part.__name__}{surface, other_surface}')
 
                 if area > other_part.largest_intersection:
                     # print(part.__name__, other_part.__name__, area / other_surface.area)
