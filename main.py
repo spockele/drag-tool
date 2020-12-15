@@ -133,6 +133,7 @@ if __name__ == '__main__':
     else:
         for direction in (0, 1, 2):
             drag_area = []
+            cop = []
             for velocity in ('0-1', '2-5', '5', '7-5', '10', '11-1'):
                 geometry = 'quadcopter_geometry_1' if direction == 1 else 'quadcopter_geometry'
                 case = Case(f'quadcopter/{velocity}_{direction}', geometry=geometry)
@@ -140,5 +141,12 @@ if __name__ == '__main__':
                 case.write_to_file()
 
                 drag_area.append(data[1])
+                cop.append(data[2])
 
-            print(sum(drag_area) / len(drag_area))
+            drag_area_final = sum(drag_area) / len(drag_area)
+            cop_final = (round(sum(c[0] for c in cop) / len(cop), 3),
+                         round(sum(c[1] for c in cop) / len(cop), 3),
+                         round(sum(c[2] for c in cop) / len(cop), 3)
+                         )
+
+            print(drag_area_final, cop_final)

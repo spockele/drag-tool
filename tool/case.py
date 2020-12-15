@@ -184,35 +184,21 @@ class Case:
                     other_part.set_largest_intersection(area)
 
         total_drag = 0.
-        total_area = 0.
 
-        total_moment_z = 0.
-        total_moment_y = 0.
-        total_moment_x = 0.
+        total_moments = [0., 0., 0.]
 
         for part in self.parts:
             part.apply_slowdown(self.flow_direction)
             total_drag += part.drag
 
             if 'rotor' not in part.__name__:
-                total_moment_z += part.drag * part.z_centre
-                total_moment_y += part.drag * part.y_centre
+                for direction in perpendicular_plane:
+                    total_moments[direction] += part.drag * part.position[direction]
 
-                part.set_frontal_surface(0, 1)
-                surface = part.get_frontal_surface()
-                total_area += surface.area
-
-                if isinstance(surface, ConeSideSurface):
-                    total_moment_x += surface.geometric_centre * surface.area
-                else:
-                    total_moment_x += part.get_frontal_surface().area * part.x_centre
-
-        self.cop = (round(total_moment_x / total_area, 3),
-                    round(total_moment_y / total_drag, 3),
-                    round(total_moment_z / total_drag, 3))
+        self.cop = tuple(round(moment / total_drag, 3) for moment in total_moments)
 
         drag_area = total_drag / (0.5 * self.density * self.velocity ** 2)
 
-        self.result = round(total_drag, 3), round(drag_area, 3)
+        self.result = round(total_drag, 3), round(drag_area, 3), self.cop
 
         return self.velocity, self.result
