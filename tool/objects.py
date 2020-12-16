@@ -291,7 +291,22 @@ class IceCreamCone(Part):
 
             centroid = sum([a * x[i] for i, a in enumerate(area)]) / sum(area)
 
-            self._frontal_surface = ConeSideSurface(centroid, sum(area))
+            if self.orientation == axis_1:
+                left = self.position[axis_1] - self.radius
+                right = self.position[axis_1] + self.length_cylinder + self.length_cone
+                top = self.position[axis_2] + self.radius
+                bottom = self.position[axis_2] - self.radius
+
+            elif self.orientation == axis_2:
+                bottom = self.position[axis_1] - self.radius
+                top = self.position[axis_1] + self.length_cylinder + self.length_cone
+                right = self.position[axis_2] + self.radius
+                left = self.position[axis_2] - self.radius
+
+            else:
+                left, right, top, bottom = 0., 0., 0., 0.
+
+            self._frontal_surface = ConeSideSurface(centroid, sum(area), left, right, top, bottom)
 
         else:
             raise ValueError(f"Frontal surface calculation in {axis_1}{axis_2} plane not "
@@ -316,8 +331,7 @@ class IceCreamCone(Part):
             return self.drag_coefficient * (volume ** (2 / 3)) * self.dynamic_pressure
 
         else:
-            raise ValueError(f"Drag calculation along {direction} axis not supported for "
-                             f"IceCreamCone")
+            return Cylinder.drag_coefficient * self._frontal_surface.area * self.dynamic_pressure
 
 
 class Disk(Part):

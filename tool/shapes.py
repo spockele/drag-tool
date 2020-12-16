@@ -5,19 +5,6 @@
 import numpy as np
 
 
-class ConeSideSurface:
-    """
-
-    """
-
-    def __init__(self, geometric_centre, area):
-        self.geometric_centre = geometric_centre
-        self.area = area
-
-    def intersection(self, other):
-        raise NotImplementedError(f"The intersection with a general surface cannot be calculated.")
-
-
 class Rectangle:
     """
 
@@ -48,8 +35,22 @@ class Rectangle:
             return intersection_rectangles(other, self)
         elif isinstance(other, Circle):
             return intersection_rectangle_circle(self, other)
+        elif isinstance(other, ConeSideSurface):
+            return intersection_rectangles(other, self)
         else:
             raise TypeError(f"Cannot calculate intersection of Rectangle and {type(other)}")
+
+
+class ConeSideSurface(Rectangle):
+    """
+
+    """
+
+    def __init__(self, geometric_centre, area, left, right, top, bottom):
+        super().__init__(left, right, top, bottom)
+
+        self.geometric_centre = geometric_centre
+        self.area = area
 
 
 class Circle:
@@ -97,6 +98,8 @@ class Circle:
             return intersection_rectangle_circle(other, self)
         elif isinstance(other, Circle):
             return intersection_circle_circle(other, self)
+        elif isinstance(other, ConeSideSurface):
+            return intersection_rectangle_circle(other, self)
         else:
             raise TypeError(f"Cannot calculate intersection of Circle and {type(other)}")
 
@@ -246,7 +249,7 @@ def circle_no_intersection(circle1, circle2):
     return area
 
 
-def intersection_rectangle_circle(rectangle: Rectangle, circle: Circle):
+def intersection_rectangle_circle(rectangle, circle: Circle):
     inside_vertices, outside_vertices = find_inside_vertices(circle, rectangle)
 
     if len(inside_vertices) == 0:
@@ -383,7 +386,7 @@ def intersection_circle_circle(circle1: Circle, circle2: Circle):
     return round(area, 3)
 
 
-def intersection_rectangles(rectangle_1: Rectangle, rectangle_2: Rectangle):
+def intersection_rectangles(rectangle_1, rectangle_2: Rectangle):
     left = max(rectangle_1.left, rectangle_2.left)
     right = min(rectangle_1.right, rectangle_2.right)
     bottom = max(rectangle_1.bottom, rectangle_2.bottom)
