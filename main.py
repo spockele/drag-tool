@@ -130,7 +130,7 @@ if __name__ == '__main__':
     elif case == 'q':
         exit()
 
-    else:
+    elif case == '':
         results = []
         for direction in (0, 1, 2):
             drag_area = []
@@ -152,8 +152,6 @@ if __name__ == '__main__':
 
             results.append((drag_area_final, cop_final))
 
-        print(results)
-
         lines = [f'Flow direction, Drag Area [m2], CoP (x) [m], CoP (y) [m], CoP (z) [m],\n',
                  f'x, {results[0][0]}, {results[0][1][0]}, {results[0][1][1]}, {results[0][1][2]},\n',
                  f'y, {results[1][0]}, {results[1][1][0]}, {results[1][1][1]}, {results[1][1][2]},\n',
@@ -162,3 +160,8 @@ if __name__ == '__main__':
         f = open('data/result_quadcopter.csv', 'w')
         f.writelines(lines)
         f.close()
+
+    else:
+        case = Case(case)
+        _ = case.run_case()
+        case.write_to_file()
