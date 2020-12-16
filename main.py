@@ -107,30 +107,61 @@ if __name__ == '__main__':
     elif case == 'slowdown':
         Case('template_case').plot_slowdown()
 
-    elif case == 'all' or case == 'a':
-        for case in ('all_concepts/quadcopter', 'all_concepts/helipack', 'all_concepts/icecream'):
-            runner = Case(case)
-            runner.run_case()
-            runner.write_to_file()
-
-    elif case == 'sensitivity' or case == 's':
-        results = {}
-        for name in ('quadcopter', 'helipack', 'icecream'):
-            results[name] = []
-
-            for index in range(5):
-                runner = Case(f'sensitivity_analysis/{name}_{index}')
-                velocity, result = runner.run_case()
-                runner.write_to_file()
-
-                results[name].append(result[1])
-
-        sensitivity_plotter(results)
+    # elif case == 'all' or case == 'a':
+    #     for case in ('all_concepts/quadcopter', 'all_concepts/helipack', 'all_concepts/icecream'):
+    #         runner = Case(case)
+    #         runner.run_case()
+    #         runner.write_to_file()
+    #
+    # elif case == 'sensitivity' or case == 's':
+    #     results = {}
+    #     for name in ('quadcopter', 'helipack', 'icecream'):
+    #         results[name] = []
+    #
+    #         for index in range(5):
+    #             runner = Case(f'sensitivity_analysis/{name}_{index}')
+    #             velocity, result = runner.run_case()
+    #             runner.write_to_file()
+    #
+    #             results[name].append(result[1])
+    #
+    #     sensitivity_plotter(results)
 
     elif case == 'q':
         exit()
 
+    elif case == '':
+        results = []
+        for direction in (0, 1, 2):
+            drag_area = []
+            cop = []
+            for velocity in ('0-1', '2-5', '5', '7-5', '10', '11-1'):
+                geometry = 'quadcopter_geometry_1' if direction == 1 else 'quadcopter_geometry'
+                case = Case(f'quadcopter/{velocity}_{direction}', geometry=geometry)
+                _, data = case.run_case()
+                case.write_to_file()
+
+                drag_area.append(data[1])
+                cop.append(data[2])
+
+            drag_area_final = sum(drag_area) / len(drag_area)
+            cop_final = (round(sum(c[0] for c in cop) / len(cop), 3),
+                         round(sum(c[1] for c in cop) / len(cop), 3),
+                         round(sum(c[2] for c in cop) / len(cop), 3)
+                         )
+
+            results.append((drag_area_final, cop_final))
+
+        lines = [f'Flow direction, Drag Area [m2], CoP (x) [m], CoP (y) [m], CoP (z) [m],\n',
+                 f'x, {results[0][0]}, {results[0][1][0]}, {results[0][1][1]}, {results[0][1][2]},\n',
+                 f'y, {results[1][0]}, {results[1][1][0]}, {results[1][1][1]}, {results[1][1][2]},\n',
+                 f'z, {results[2][0]}, {results[2][1][0]}, {results[2][1][1]}, {results[2][1][2]},\n']
+
+        f = open('data/result_quadcopter.csv', 'w')
+        f.writelines(lines)
+        f.close()
+
     else:
-        runner = Case(case)
-        runner.run_case()
-        runner.write_to_file()
+        case = Case(case)
+        _ = case.run_case()
+        case.write_to_file()
