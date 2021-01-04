@@ -1,0 +1,36 @@
+Case Definition,
+Density, Velocity, flow_direction,
+1.225, 0, 0,
+Spheres,
+name, centre x, centre y, centre z, radius,
+#
+#
+Cylinders,
+name, centre x, centre y, centre z, radius, length, orientation,
+#
+FL motor, -0.826, -0.4535, 0.906, 0.0845, 0.124, 1,
+FR motor, -0.826, -0.4535, -0.906, 0.0845, 0.124, 1,
+BL motor, 0.826, -0.4535, 0.906, 0.0845, 0.124, 1,
+BR motor, 0.826, -0.4535, -0.906, 0.0845, 0.124, 1,
+#
+Cuboids,
+name, centre x, centre y, centre z, dimension x, dimension y, dimension z,
+#
+main body, 0, 0, 0, 0.840, 0.857, 0.500,
+main body top, 0, 0.6535, 0, 0.840, 0.450, 0.500,
+battery, 0, -0.5445, 0, 0.820, 0.232, 0.460,
+#
+FL arm, -0.826, -0.4535, 0.613645, 0.100, 0.050, 0.594,
+FR arm, -0.826, -0.4535, -0.613645, 0.100, 0.050, 0.594,
+BL arm, 0.826, -0.4535, 0.613645, 0.100, 0.050, 0.594,
+BR arm, 0.826, -0.4535, -0.613645, 0.100, 0.050, 0.594,
+#
+IceCream Cones,
+name, centre x, centre y, centre z, radius, length_cylinder, length_cone, orientation,
+#
+#
+Disks,
+name, centre x, centre y, centre z, radius, orientation1, orientation2,
+#
+#
+,
