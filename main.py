@@ -136,8 +136,8 @@ if __name__ == '__main__':
             drag_area = []
             cop = []
             for velocity in ('0-1', '2-5', '5', '7-5', '10', '11-1'):
-                geometry = 'quadcopter_geometry_1' if direction == 1 else 'quadcopter_geometry'
-                case = Case(f'quadcopter/{velocity}_{direction}', geometry=geometry)
+                geometry = 'final_concept_1' if direction == 1 else 'final_concept'
+                case = Case(f'sub_main/{velocity}_{direction}', geometry=geometry)
                 _, data = case.run_case()
                 case.write_to_file()
 
@@ -157,7 +157,7 @@ if __name__ == '__main__':
                  f'y, {results[1][0]}, {results[1][1][0]}, {results[1][1][1]}, {results[1][1][2]},\n',
                  f'z, {results[2][0]}, {results[2][1][0]}, {results[2][1][1]}, {results[2][1][2]},\n']
 
-        f = open('data/result_quadcopter.csv', 'w')
+        f = open('data/result_final_concept.csv', 'w')
         f.writelines(lines)
         f.close()
 
